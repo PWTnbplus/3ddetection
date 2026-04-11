@@ -5,6 +5,7 @@ from .kitti_dataset import KittiDataset
 from .lyft_dataset import LyftDataset
 from .nuscenes_dataset import NuScenesDataset
 from .radar_dataset import RadarDataset
+from .radar_text_dataset import RadarTextDataset
 # yapf: enable
 from .s3dis_dataset import S3DISDataset, S3DISSegDataset
 from .scannet_dataset import (ScanNetDataset, ScanNetInstanceSegDataset,
@@ -27,8 +28,9 @@ from .utils import get_loading_pipeline
 from .waymo_dataset import WaymoDataset
 
 __all__ = [
-    'KittiDataset', 'RadarDataset', 'CBGSDataset', 'NuScenesDataset', 'LyftDataset',
-    'ObjectSample', 'RandomFlip3D', 'ObjectNoise', 'GlobalRotScaleTrans',
+    'KittiDataset', 'RadarDataset', 'RadarTextDataset', 'CBGSDataset',
+    'NuScenesDataset', 'LyftDataset', 'ObjectSample', 'RandomFlip3D',
+    'ObjectNoise', 'GlobalRotScaleTrans',
     'PointShuffle', 'ObjectRangeFilter', 'PointsRangeFilter',
     'LoadPointsFromFile', 'S3DISSegDataset', 'S3DISDataset',
     'NormalizePointsColor', 'IndoorPatchPointSample', 'IndoorPointSample',

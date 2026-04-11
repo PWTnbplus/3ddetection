@@ -19,14 +19,16 @@ from .sassd import SASSD
 from .single_stage_mono3d import SingleStageMono3DDetector
 from .smoke_mono3d import SMOKEMono3D
 from .ssd3dnet import SSD3DNet
+from .text_voxelnet import ImagePointVoxelNet, TextVoxelNet
 from .votenet import VoteNet
 from .voxelnet import VoxelNet
 
 __all__ = [
-    'Base3DDetector', 'VoxelNet', 'DynamicVoxelNet', 'MVXTwoStageDetector',
-    'DynamicMVXFasterRCNN', 'MVXFasterRCNN', 'PartA2', 'VoteNet', 'H3DNet',
-    'CenterPoint', 'SSD3DNet', 'ImVoteNet', 'SingleStageMono3DDetector',
-    'FCOSMono3D', 'ImVoxelNet', 'GroupFree3DNet', 'PointRCNN', 'SMOKEMono3D',
-    'SASSD', 'MinkSingleStage3DDetector', 'MultiViewDfM', 'DfM',
-    'PointVoxelRCNN'
+    'Base3DDetector', 'VoxelNet', 'TextVoxelNet', 'ImagePointVoxelNet',
+    'DynamicVoxelNet',
+    'MVXTwoStageDetector', 'DynamicMVXFasterRCNN', 'MVXFasterRCNN', 'PartA2',
+    'VoteNet', 'H3DNet', 'CenterPoint', 'SSD3DNet', 'ImVoteNet',
+    'SingleStageMono3DDetector', 'FCOSMono3D', 'ImVoxelNet',
+    'GroupFree3DNet', 'PointRCNN', 'SMOKEMono3D', 'SASSD',
+    'MinkSingleStage3DDetector', 'MultiViewDfM', 'DfM', 'PointVoxelRCNN'
 ]

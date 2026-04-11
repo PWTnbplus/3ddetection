@@ -15,6 +15,10 @@ DEFAULT_CLASSES = [
     'rider', 'truck', 'vehicle_other'
 ]
 
+DEFAULT_KEEP_CLASSES = [
+    'bicycle', 'Car', 'Cyclist', 'motor', 'Pedestrian', 'ride_other', 'truck'
+]
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -34,7 +38,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         '--class-names',
         nargs='+',
-        default=DEFAULT_CLASSES,
+        default=DEFAULT_KEEP_CLASSES,
         help='Classes to keep. Other labels are ignored.')
     parser.add_argument(
         '--splits',
@@ -153,7 +157,7 @@ def build_data_info(data_root: Path, sample_id: str, data_index: int,
                 lidar2cam=lidar2cam.tolist(),
                 lidar2img=(calib['P2'] @ lidar2cam).tolist())),
         lidar_points=dict(
-            num_pts_feats=4,
+            num_pts_feats=7,
             lidar_path=lidar_path.name,
             Tr_velo_to_cam=calib['Tr_velo_to_cam'].tolist(),
             Tr_imu_to_velo=calib['Tr_imu_to_velo'].tolist()),
@@ -192,7 +196,7 @@ def main() -> None:
     args = parse_args()
     data_root = Path(args.data_root)
     out_dir = Path(args.out_dir) if args.out_dir else data_root
-    categories = {name: index for index, name in enumerate(args.class_names)}
+    categories = {name: DEFAULT_CLASSES.index(name) for name in args.class_names}
 
     split_infos = {}
     for split in args.splits:
