@@ -6,7 +6,7 @@ _base_ = [
 dataset_type = 'RadarDataset'
 data_root = 'dataset/radar/'
 point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]
-input_modality = dict(use_lidar=True, use_camera=True)
+input_modality = dict(use_lidar=True, use_camera=False)
 backend_args = None
 
 class_names = [
@@ -35,32 +35,8 @@ anchor_sizes = [
 ]
 
 model = dict(
-    type='ImagePointVoxelNet',
     data_preprocessor=dict(
-        mean=[123.675, 116.28, 103.53],
-        std=[58.395, 57.12, 57.375],
-        bgr_to_rgb=True,
-        pad_size_divisor=32,
         voxel_layer=dict(point_cloud_range=point_cloud_range)),
-    img_backbone=dict(
-        type='mmdet.ResNet',
-        depth=18,
-        num_stages=4,
-        out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
-        norm_cfg=dict(type='BN', requires_grad=True),
-        norm_eval=True,
-        style='pytorch'),
-    img_neck=dict(
-        type='mmdet.FPN',
-        in_channels=[64, 128, 256, 512],
-        out_channels=256,
-        num_outs=4),
-    fusion=dict(
-        type='ImageRadarBEVFusion',
-        image_channels=256,
-        bev_channels=384,
-        image_dropout=0.1),
     voxel_encoder=dict(point_cloud_range=point_cloud_range),
     bbox_head=dict(
         num_classes=len(class_names),
@@ -87,7 +63,6 @@ train_pipeline = [
         load_dim=7,
         use_dim=[0, 1, 2, 3],
         backend_args=backend_args),
-    dict(type='LoadImageFromFile', backend_args=backend_args),
     dict(type='LoadAnnotations3D', with_bbox_3d=True, with_label_3d=True),
     dict(type='RandomFlip3D', flip_ratio_bev_horizontal=0.5),
     dict(
@@ -99,7 +74,7 @@ train_pipeline = [
     dict(type='PointShuffle'),
     dict(
         type='Pack3DDetInputs',
-        keys=['points', 'img', 'gt_bboxes_3d', 'gt_labels_3d'])
+        keys=['points', 'gt_bboxes_3d', 'gt_labels_3d'])
 ]
 
 test_pipeline = [
@@ -109,7 +84,6 @@ test_pipeline = [
         load_dim=7,
         use_dim=[0, 1, 2, 3],
         backend_args=backend_args),
-    dict(type='LoadImageFromFile', backend_args=backend_args),
     dict(
         type='MultiScaleFlipAug3D',
         img_scale=(1333, 800),
@@ -125,7 +99,7 @@ test_pipeline = [
             dict(
                 type='PointsRangeFilter', point_cloud_range=point_cloud_range)
         ]),
-    dict(type='Pack3DDetInputs', keys=['points', 'img'])
+    dict(type='Pack3DDetInputs', keys=['points'])
 ]
 
 train_dataloader = dict(
@@ -140,7 +114,7 @@ train_dataloader = dict(
             type=dataset_type,
             data_root=data_root,
             ann_file='radar_infos_train.pkl',
-            data_prefix=dict(pts='training/velodyne', img='training/image_2'),
+            data_prefix=dict(pts='training/velodyne'),
             pipeline=train_pipeline,
             modality=input_modality,
             test_mode=False,
@@ -157,7 +131,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        data_prefix=dict(pts='training/velodyne', img='training/image_2'),
+        data_prefix=dict(pts='training/velodyne'),
         ann_file='radar_infos_val.pkl',
         pipeline=test_pipeline,
         modality=input_modality,
@@ -175,7 +149,7 @@ test_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        data_prefix=dict(pts='training/velodyne', img='training/image_2'),
+        data_prefix=dict(pts='training/velodyne'),
         ann_file='radar_infos_test.pkl',
         pipeline=test_pipeline,
         modality=input_modality,
