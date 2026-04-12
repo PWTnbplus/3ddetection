@@ -25,29 +25,19 @@ input_modality = dict(use_lidar=True, use_camera=True)
 backend_args = None
 point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]
 voxel_size = [0.16, 0.16, 4]
-class_names = [
-    'bicycle', 'Car', 'Cyclist', 'motor', 'Pedestrian', 'ride_other', 'truck'
-]
+class_names = ['Car', 'Pedestrian', 'Cyclist']
 metainfo = dict(classes=class_names)
 
 anchor_ranges = [
-    [0, -39.68, -0.6, 69.12, 39.68, -0.6],
     [0, -39.68, -1.78, 69.12, 39.68, -1.78],
     [0, -39.68, -0.6, 69.12, 39.68, -0.6],
     [0, -39.68, -0.6, 69.12, 39.68, -0.6],
-    [0, -39.68, -0.6, 69.12, 39.68, -0.6],
-    [0, -39.68, -0.6, 69.12, 39.68, -0.6],
-    [0, -39.68, -1.78, 69.12, 39.68, -1.78],
 ]
 
 anchor_sizes = [
-    [1.843, 0.594, 1.174],
     [4.165, 1.839, 1.573],
-    [1.946, 0.777, 1.751],
-    [2.250, 1.007, 1.601],
     [0.649, 0.637, 1.650],
-    [1.207, 0.736, 1.114],
-    [6.814, 2.492, 2.765],
+    [1.946, 0.777, 1.751],
 ]
 
 model = dict(
@@ -277,11 +267,10 @@ test_evaluator = dict(
     submission_prefix='work_dirs/pointpillars_image_radar_test/submission',
     backend_args=backend_args)
 
-lr = 0.001
+lr = 0.0002
 epoch_num = 12
 optim_wrapper = dict(
-    type='AmpOptimWrapper',
-    loss_scale='dynamic',
+    type='OptimWrapper',
     optimizer=dict(type='AdamW', lr=lr, betas=(0.95, 0.99), weight_decay=0.01),
     clip_grad=dict(max_norm=35, norm_type=2))
 param_scheduler = [
