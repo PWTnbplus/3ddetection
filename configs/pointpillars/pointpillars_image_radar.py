@@ -4,7 +4,7 @@ default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=50),
     param_scheduler=dict(type='ParamSchedulerHook'),
-    checkpoint=dict(type='CheckpointHook', interval=-1),
+    checkpoint=dict(type='CheckpointHook', interval=2),
     sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(type='Det3DVisualizationHook'))
 
@@ -18,6 +18,14 @@ log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 log_level = 'INFO'
 load_from = None
 resume = False
+work_dir = './work_dirs/pointpillars_image_radar_3class_bs4'
+
+vis_backends = [
+    dict(type='LocalVisBackend'),
+    dict(type='TensorboardVisBackend')
+]
+visualizer = dict(
+    type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
 dataset_type = 'RadarDataset'
 data_root = 'dataset/radar/'
@@ -254,9 +262,6 @@ val_evaluator = dict(
     type='KittiMetric',
     ann_file=data_root + 'radar_infos_val.pkl',
     metric='bbox',
-    format_only=True,
-    pklfile_prefix='work_dirs/pointpillars_image_radar/predictions',
-    submission_prefix='work_dirs/pointpillars_image_radar/submission',
     backend_args=backend_args)
 test_evaluator = dict(
     type='KittiMetric',
