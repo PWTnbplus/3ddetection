@@ -12,32 +12,23 @@ from .voxelnet import VoxelNet
 
 @MODELS.register_module()
 class ImagePointVoxelNet(VoxelNet):
-    """PointPillars/VoxelNet with lightweight image-conditioned BEV fusion."""
+    """VoxelNet with image-BEV and point-BEV two-branch fusion.
+
+    The image branch produces an image BEV-like feature map by projecting image
+    FPN features to the radar BEV feature resolution, then fuses it with the
+    radar BEV feature before the 3D detection head.
+    """
 
     def __init__(self,
                  *args,
                  img_backbone: Optional[dict] = None,
                  img_neck: Optional[dict] = None,
-                 image_channels: int = 256,
-                 bev_channels: int = 384,
-                 image_dropout: float = 0.0,
+                 fusion: Optional[dict] = None,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.img_backbone = MODELS.build(img_backbone) if img_backbone else None
         self.img_neck = MODELS.build(img_neck) if img_neck else None
-        self.image_channels = image_channels
-        self.bev_channels = bev_channels
-        self.image_proj = nn.Sequential(
-            nn.LayerNorm(image_channels),
-            nn.Linear(image_channels, image_channels),
-            nn.ReLU(inplace=True),
-            nn.Dropout(image_dropout),
-            nn.Linear(image_channels, bev_channels),
-        )
-        self.image_scalar_proj = nn.Sequential(
-            nn.LayerNorm(image_channels),
-            nn.Linear(image_channels, 1),
-        )
+        self.fusion = MODELS.build(fusion) if fusion else None
 
     @property
     def with_img_backbone(self) -> bool:
@@ -48,58 +39,39 @@ class ImagePointVoxelNet(VoxelNet):
         return self.img_neck is not None
 
     def extract_feat(self, batch_inputs_dict: dict) -> Tuple[Tensor]:
-        pts_feats = super().extract_feat(batch_inputs_dict)
+        radar_bev_feats = super().extract_feat(batch_inputs_dict)
         img_feats = self.extract_img_feat(batch_inputs_dict.get('imgs', None))
-        if img_feats is None:
-            return pts_feats
+        if img_feats is None or self.fusion is None:
+            return radar_bev_feats
 
-        image_context = self._pool_image_feats(img_feats)
-        channel_bias = self.image_proj(image_context)
-        scalar_bias = self.image_scalar_proj(image_context)
-        return self._fuse_image_context(pts_feats, channel_bias, scalar_bias)
+        return self.fusion(radar_bev_feats, img_feats)
 
     def extract_img_feat(self,
                          imgs: Optional[Tensor]) -> Optional[Sequence[Tensor]]:
         if not self.with_img_backbone or imgs is None:
             return None
 
-        if imgs.dim() == 5 and imgs.size(0) == 1:
-            imgs = imgs.squeeze(0)
-        elif imgs.dim() == 5:
+        num_views = 1
+        if imgs.dim() == 5:
             batch_size, num_views, channels, height, width = imgs.size()
             imgs = imgs.view(batch_size * num_views, channels, height, width)
+        else:
+            batch_size = imgs.size(0)
 
         img_feats = self.img_backbone(imgs)
         if self.with_img_neck:
             img_feats = self.img_neck(img_feats)
         if isinstance(img_feats, Tensor):
             img_feats = [img_feats]
+
+        if num_views > 1:
+            img_feats = [
+                feat.view(batch_size, num_views, feat.size(1), feat.size(2),
+                          feat.size(3)).mean(dim=1)
+                for feat in img_feats
+            ]
         return img_feats
 
-    def _pool_image_feats(self, img_feats: Sequence[Tensor]) -> Tensor:
-        pooled_feats = [
-            feat.mean(dim=(-1, -2))
-            for feat in img_feats
-            if feat.shape[1] == self.image_channels
-        ]
-        if pooled_feats:
-            return torch.stack(pooled_feats, dim=0).mean(dim=0)
-
-        return img_feats[-1].mean(dim=(-1, -2))
-
-    def _fuse_image_context(self, feats, channel_bias: Tensor,
-                            scalar_bias: Tensor):
-        fused_feats = []
-        for feat in feats:
-            if feat.shape[1] == self.bev_channels:
-                bias = channel_bias[:, :, None, None]
-            else:
-                bias = scalar_bias[:, :, None, None]
-            fused_feats.append(feat + bias.to(dtype=feat.dtype))
-
-        if isinstance(feats, tuple):
-            return tuple(fused_feats)
-        return fused_feats
 
 
 @MODELS.register_module()

@@ -324,3 +324,142 @@ class DynamicPillarFeatureNet(PillarFeatureNet):
                 features = torch.cat([point_feats, feat_per_point], dim=1)
 
         return voxel_feats, voxel_coors
+
+@MODELS.register_module()
+class Radar7PillarFeatureNet(nn.Module):
+    """Pillar feature encoder for 7-D radar points.
+
+    The expected point layout is ``x, y, z, rcs, v_r, v_r_comp, time``.
+    """
+
+    def __init__(self,
+                 in_channels: Optional[int] = 4,
+                 feat_channels: Optional[tuple] = (64, ),
+                 with_distance: Optional[bool] = False,
+                 with_cluster_center: Optional[bool] = True,
+                 with_voxel_center: Optional[bool] = True,
+                 voxel_size: Optional[Tuple[float]] = (0.2, 0.2, 4),
+                 point_cloud_range: Optional[Tuple[float]] = (0, -40, -3, 70.4,
+                                                              40, 1),
+                 norm_cfg: Optional[dict] = dict(
+                     type='BN1d', eps=1e-3, momentum=0.01),
+                 mode: Optional[str] = 'max',
+                 legacy: Optional[bool] = False,
+                 use_xyz: Optional[bool] = True,
+                 use_rcs: Optional[bool] = True,
+                 use_vr: Optional[bool] = True,
+                 use_vr_comp: Optional[bool] = True,
+                 use_time: Optional[bool] = True,
+                 use_elevation: Optional[bool] = True) -> None:
+        super().__init__()
+        assert len(feat_channels) > 0
+        if not with_cluster_center:
+            raise ValueError('with_cluster_center must be True')
+        if not with_voxel_center:
+            raise ValueError('with_voxel_center must be True')
+        if legacy:
+            raise ValueError('legacy must be False')
+
+        self.use_elevation = use_elevation
+        self._with_distance = with_distance
+        self._with_voxel_center = with_voxel_center
+
+        available_features = ['x', 'y', 'z', 'rcs', 'v_r', 'v_r_comp', 'time']
+        self.x_ind = available_features.index('x')
+        self.y_ind = available_features.index('y')
+        self.z_ind = available_features.index('z')
+        self.rcs_ind = available_features.index('rcs')
+        self.vr_ind = available_features.index('v_r')
+        self.vr_comp_ind = available_features.index('v_r_comp')
+        self.time_ind = available_features.index('time')
+
+        selected_indexes = []
+        in_channels = 6  # cluster center xyz + pillar center xyz
+        if use_xyz:
+            in_channels += 3
+            selected_indexes.extend((self.x_ind, self.y_ind, self.z_ind))
+        if use_rcs:
+            in_channels += 1
+            selected_indexes.append(self.rcs_ind)
+        if use_vr:
+            in_channels += 1
+            selected_indexes.append(self.vr_ind)
+        if use_vr_comp:
+            in_channels += 1
+            selected_indexes.append(self.vr_comp_ind)
+        if use_time:
+            in_channels += 1
+            selected_indexes.append(self.time_ind)
+        if with_distance:
+            in_channels += 1
+
+        self.register_buffer(
+            'selected_indexes', torch.LongTensor(selected_indexes),
+            persistent=False)
+        self.in_channels = in_channels
+
+        feat_channels = [in_channels] + list(feat_channels)
+        pfn_layers = []
+        for i in range(len(feat_channels) - 1):
+            in_filters = feat_channels[i]
+            out_filters = feat_channels[i + 1]
+            last_layer = i == len(feat_channels) - 2
+            pfn_layers.append(
+                PFNLayer(
+                    in_filters,
+                    out_filters,
+                    norm_cfg=norm_cfg,
+                    last_layer=last_layer,
+                    mode=mode))
+        self.pfn_layers = nn.ModuleList(pfn_layers)
+
+        self.vx = voxel_size[0]
+        self.vy = voxel_size[1]
+        self.vz = voxel_size[2]
+        self.x_offset = self.vx / 2 + point_cloud_range[0]
+        self.y_offset = self.vy / 2 + point_cloud_range[1]
+        self.z_offset = self.vz / 2 + point_cloud_range[2]
+        self.point_cloud_range = point_cloud_range
+
+    def forward(self, features: Tensor, num_points: Tensor, coors: Tensor,
+                *args, **kwargs) -> Tensor:
+        if features.size(-1) < 7:
+            raise ValueError(
+                'Radar7PillarFeatureNet expects at least 7 point features: '
+                'x, y, z, rcs, v_r, v_r_comp, time')
+
+        if not self.use_elevation:
+            features = features.clone()
+            features[:, :, self.z_ind] = 0
+
+        points_mean = features[:, :, :self.z_ind + 1].sum(
+            dim=1, keepdim=True) / num_points.type_as(features).view(-1, 1, 1)
+        f_cluster = features[:, :, :3] - points_mean
+
+        dtype = features.dtype
+        f_center = torch.zeros_like(features[:, :, :3])
+        f_center[:, :, 0] = features[:, :, 0] - (
+            coors[:, 3].to(dtype).unsqueeze(1) * self.vx + self.x_offset)
+        f_center[:, :, 1] = features[:, :, 1] - (
+            coors[:, 2].to(dtype).unsqueeze(1) * self.vy + self.y_offset)
+        f_center[:, :, 2] = features[:, :, 2] - (
+            coors[:, 1].to(dtype).unsqueeze(1) * self.vz + self.z_offset)
+
+        selected_features = features[:, :, self.selected_indexes]
+        features_ls = [selected_features, f_cluster, f_center]
+
+        if self._with_distance:
+            points_dist = torch.norm(features[:, :, :3], 2, 2, keepdim=True)
+            features_ls.append(points_dist)
+
+        features = torch.cat(features_ls, dim=-1)
+        voxel_count = features.shape[1]
+        mask = get_paddings_indicator(num_points, voxel_count, axis=0)
+        mask = torch.unsqueeze(mask, -1).type_as(features)
+        features *= mask
+
+        for pfn in self.pfn_layers:
+            features = pfn(features, num_points)
+
+        return features.squeeze(1)
+

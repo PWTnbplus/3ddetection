@@ -56,9 +56,11 @@ model = dict(
         in_channels=[64, 128, 256, 512],
         out_channels=256,
         num_outs=4),
-    image_channels=256,
-    bev_channels=384,
-    image_dropout=0.1,
+    fusion=dict(
+        type='ImageRadarBEVFusion',
+        image_channels=256,
+        bev_channels=384,
+        image_dropout=0.1),
     voxel_encoder=dict(point_cloud_range=point_cloud_range),
     bbox_head=dict(
         num_classes=len(class_names),
