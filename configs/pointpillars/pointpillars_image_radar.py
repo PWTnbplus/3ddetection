@@ -162,6 +162,7 @@ train_pipeline = [
         use_dim=[0, 1, 2, 3],
         backend_args=backend_args),
     dict(type='LoadImageFromFile', backend_args=backend_args),
+    dict(type='mmdet.Resize', scale=(704, 256), keep_ratio=True),
     dict(type='LoadAnnotations3D', with_bbox_3d=True, with_label_3d=True),
     dict(type='RandomFlip3D', flip_ratio_bev_horizontal=0.5),
     dict(
@@ -184,6 +185,7 @@ test_pipeline = [
         use_dim=[0, 1, 2, 3],
         backend_args=backend_args),
     dict(type='LoadImageFromFile', backend_args=backend_args),
+    dict(type='mmdet.Resize', scale=(704, 256), keep_ratio=True),
     dict(
         type='MultiScaleFlipAug3D',
         img_scale=(1333, 800),
@@ -203,8 +205,8 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=6,
-    num_workers=4,
+    batch_size=1,
+    num_workers=2,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
     dataset=dict(
@@ -278,7 +280,8 @@ test_evaluator = dict(
 lr = 0.001
 epoch_num = 12
 optim_wrapper = dict(
-    type='OptimWrapper',
+    type='AmpOptimWrapper',
+    loss_scale='dynamic',
     optimizer=dict(type='AdamW', lr=lr, betas=(0.95, 0.99), weight_decay=0.01),
     clip_grad=dict(max_norm=35, norm_type=2))
 param_scheduler = [

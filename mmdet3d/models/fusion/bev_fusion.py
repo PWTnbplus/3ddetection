@@ -151,6 +151,16 @@ class ImageRadarBEVFusion(nn.Module):
             depth = projected[:, 2].clamp(min=1e-5)
             pixel_x = projected[:, 0] / depth
             pixel_y = projected[:, 1] / depth
+            scale_factor = data_sample.metainfo.get('scale_factor', None)
+            if scale_factor is not None:
+                scale_factor = torch.as_tensor(
+                    scale_factor, device=device, dtype=dtype).flatten()
+                if scale_factor.numel() == 1:
+                    pixel_x = pixel_x * scale_factor[0]
+                    pixel_y = pixel_y * scale_factor[0]
+                else:
+                    pixel_x = pixel_x * scale_factor[0]
+                    pixel_y = pixel_y * scale_factor[1]
 
             input_shape = data_sample.metainfo.get(
                 'batch_input_shape',
