@@ -38,13 +38,33 @@ class ImagePointVoxelNet(VoxelNet):
     def with_img_neck(self) -> bool:
         return self.img_neck is not None
 
-    def extract_feat(self, batch_inputs_dict: dict) -> Tuple[Tensor]:
+    def loss(self, batch_inputs_dict: dict, batch_data_samples: SampleList,
+             **kwargs) -> dict:
+        x = self.extract_feat(batch_inputs_dict, batch_data_samples)
+        return self.bbox_head.loss(x, batch_data_samples, **kwargs)
+
+    def predict(self, batch_inputs_dict: dict, batch_data_samples: SampleList,
+                **kwargs) -> SampleList:
+        x = self.extract_feat(batch_inputs_dict, batch_data_samples)
+        results_list = self.bbox_head.predict(x, batch_data_samples, **kwargs)
+        return self.add_pred_to_datasample(batch_data_samples, results_list)
+
+    def _forward(self,
+                 batch_inputs_dict: dict,
+                 data_samples: OptSampleList = None,
+                 **kwargs) -> Tuple[List[Tensor]]:
+        x = self.extract_feat(batch_inputs_dict, data_samples)
+        return self.bbox_head.forward(x)
+
+    def extract_feat(self,
+                     batch_inputs_dict: dict,
+                     batch_data_samples: OptSampleList = None) -> Tuple[Tensor]:
         radar_bev_feats = super().extract_feat(batch_inputs_dict)
         img_feats = self.extract_img_feat(batch_inputs_dict.get('imgs', None))
         if img_feats is None or self.fusion is None:
             return radar_bev_feats
 
-        return self.fusion(radar_bev_feats, img_feats)
+        return self.fusion(radar_bev_feats, img_feats, batch_data_samples)
 
     def extract_img_feat(self,
                          imgs: Optional[Tensor]) -> Optional[Sequence[Tensor]]:
