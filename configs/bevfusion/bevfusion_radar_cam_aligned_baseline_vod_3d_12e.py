@@ -1,6 +1,6 @@
 custom_imports = dict(
     imports=[
-        'projects.BEVFusion.bevfusion',
+        'mmdet3d.models.bevfusion',
         'mmdet3d.models.fusion.aligned_conv_fuser',
     ],
     allow_failed_imports=False)
@@ -402,3 +402,4 @@ optim_wrapper = dict(
     clip_grad=dict(max_norm=35, norm_type=2))
 
 auto_scale_lr = dict(enable=False, base_batch_size=32)
+

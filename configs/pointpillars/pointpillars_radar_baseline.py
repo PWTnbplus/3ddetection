@@ -4,7 +4,7 @@ default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=50),
     param_scheduler=dict(type='ParamSchedulerHook'),
-    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=8),
+    checkpoint=dict(type='CheckpointHook', interval=5),
     sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(type='Det3DVisualizationHook'))
 
@@ -32,7 +32,7 @@ data_root = '/root/lanyun-fs/dataset/radar/'
 input_modality = dict(use_lidar=True, use_camera=False)
 backend_args = None
 point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]
-voxel_size = [0.16, 0.16, 4]
+voxel_size = [0.16, 0.16, 2]
 class_names = ['Car', 'Pedestrian', 'Cyclist']
 metainfo = dict(classes=class_names)
 
@@ -125,11 +125,11 @@ model = dict(
     test_cfg=dict(
         use_rotate_nms=True,
         nms_across_levels=False,
-        nms_thr=0.01,
-        score_thr=0.1,
+        nms_thr=0.05,
+        score_thr=0.05,
         min_bbox_size=0,
-        nms_pre=100,
-        max_num=50))
+        nms_pre=300,
+        max_num=100))
 
 train_pipeline = [
     dict(
@@ -178,7 +178,7 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=6,
     num_workers=4,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
@@ -247,7 +247,7 @@ test_evaluator = dict(
     submission_prefix='work_dirs/pointpillars_radar_baseline_test/submission',
     backend_args=backend_args)
 
-lr = 0.001
+lr = 0.0005
 epoch_num = 80
 warmup_epochs = int(epoch_num * 0.4)
 optim_wrapper = dict(
