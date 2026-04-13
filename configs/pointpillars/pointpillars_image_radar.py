@@ -28,7 +28,7 @@ visualizer = dict(
     type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
 dataset_type = 'RadarDataset'
-data_root = 'dataset/radar/'
+data_root = '/root/lanyun-fs/dataset/radar/'
 input_modality = dict(use_lidar=True, use_camera=True)
 backend_args = None
 point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]

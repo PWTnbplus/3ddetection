@@ -4,7 +4,7 @@ _base_ = [
 ]
 
 dataset_type = 'RadarDataset'
-data_root = 'dataset/radar/'
+data_root = '/root/lanyun-fs/dataset/radar/'
 point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]
 input_modality = dict(use_lidar=True, use_camera=False)
 backend_args = None

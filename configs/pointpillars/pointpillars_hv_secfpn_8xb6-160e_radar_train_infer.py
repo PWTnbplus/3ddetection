@@ -1,6 +1,6 @@
 _base_ = './pointpillars_hv_secfpn_8xb6-160e_radar-3d.py'
 
-data_root = 'dataset/radar/'
+data_root = '/root/lanyun-fs/dataset/radar/'
 
 test_dataloader = dict(dataset=dict(ann_file='radar_infos_train.pkl'))
 

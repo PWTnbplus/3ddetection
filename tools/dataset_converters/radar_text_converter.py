@@ -34,7 +34,7 @@ def parse_args() -> argparse.Namespace:
         description='Generate scene text descriptions from radar detections.')
     parser.add_argument(
         '--data-root',
-        default='dataset/radar',
+        default='/root/lanyun-fs/dataset/radar',
         help='Root path of the radar dataset.')
     parser.add_argument(
         '--source',

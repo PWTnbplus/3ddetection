@@ -35,7 +35,7 @@ visualizer = dict(
     type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
 dataset_type = 'RadarTextDataset'
-data_root = 'dataset/radar/'
+data_root = '/root/lanyun-fs/dataset/radar/'
 backend_args = None
 point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]
 voxel_size = [0.16, 0.16, 4]

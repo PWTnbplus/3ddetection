@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
         description='Build LLM prompts from radar detector text records.')
     parser.add_argument(
         '--input-file',
-        default='dataset/radar/texts/radar_texts_prediction.json',
+        default='/root/lanyun-fs/dataset/radar/texts/radar_texts_prediction.json',
         help='Input JSON generated from radar detector predictions.')
     parser.add_argument(
         '--output-file',
