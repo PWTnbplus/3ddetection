@@ -272,12 +272,12 @@ test_evaluator = dict(
     submission_prefix='work_dirs/pointpillars_image_radar_test/submission',
     backend_args=backend_args)
 
-lr = 0.0002
+lr = 0.0001
 epoch_num = 24
 optim_wrapper = dict(
     type='OptimWrapper',
-    optimizer=dict(type='AdamW', lr=lr, betas=(0.95, 0.99), weight_decay=0.01),
-    clip_grad=dict(max_norm=35, norm_type=2))
+    optimizer=dict(type='AdamW', lr=lr, weight_decay=0.01),
+    clip_grad=dict(max_norm=5, norm_type=2))
 param_scheduler = [
     dict(
         type='CosineAnnealingLR',
