@@ -32,6 +32,23 @@ class BEVLoadMultiViewImageFromFiles(LoadMultiViewImageFromFiles):
             Defaults to True.
     """
 
+    @staticmethod
+    def _to_homogeneous_4x4(matrix, name: str) -> np.ndarray:
+        matrix = np.asarray(matrix, dtype=np.float32)
+        if matrix.shape == (4, 4):
+            return matrix
+        if matrix.shape == (3, 4):
+            homogeneous = np.eye(4, dtype=np.float32)
+            homogeneous[:3, :4] = matrix
+            return homogeneous
+        if matrix.shape == (3, 3):
+            homogeneous = np.eye(4, dtype=np.float32)
+            homogeneous[:3, :3] = matrix
+            return homogeneous
+        raise ValueError(
+            f'{name} should have shape (3, 3), (3, 4), or (4, 4), '
+            f'but got {matrix.shape}.')
+
     def transform(self, results: dict) -> Optional[dict]:
         """Call function to load multi-view image from files.
 
@@ -133,21 +150,15 @@ class BEVLoadMultiViewImageFromFiles(LoadMultiViewImageFromFiles):
         filename, cam2img, lidar2cam, cam2lidar, lidar2img = [], [], [], [], []
         for _, cam_item in results['images'].items():
             filename.append(cam_item['img_path'])
-            lidar2cam.append(cam_item['lidar2cam'])
 
-            lidar2cam_array = np.array(cam_item['lidar2cam']).astype(
-                np.float32)
-            lidar2cam_rot = lidar2cam_array[:3, :3]
-            lidar2cam_trans = lidar2cam_array[:3, 3:4]
-            camera2lidar = np.eye(4)
-            camera2lidar[:3, :3] = lidar2cam_rot.T
-            camera2lidar[:3, 3:4] = -1 * np.matmul(
-                lidar2cam_rot.T, lidar2cam_trans.reshape(3, 1))
+            lidar2cam_array = self._to_homogeneous_4x4(
+                cam_item['lidar2cam'], 'lidar2cam')
+            lidar2cam.append(lidar2cam_array)
+            camera2lidar = np.linalg.inv(lidar2cam_array)
             cam2lidar.append(camera2lidar)
 
-            cam2img_array = np.eye(4).astype(np.float32)
-            cam2img_array[:3, :3] = np.array(cam_item['cam2img']).astype(
-                np.float32)
+            cam2img_array = self._to_homogeneous_4x4(
+                cam_item['cam2img'], 'cam2img')
             cam2img.append(cam2img_array)
             lidar2img.append(cam2img_array @ lidar2cam_array)
 
@@ -206,3 +217,4 @@ class BEVLoadMultiViewImageFromFiles(LoadMultiViewImageFromFiles):
         results['num_views'] = self.num_views
         results['num_ref_frames'] = self.num_ref_frames
         return results
+
