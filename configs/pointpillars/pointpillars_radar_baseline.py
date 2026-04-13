@@ -18,7 +18,7 @@ log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 log_level = 'INFO'
 load_from = None
 resume = False
-work_dir = './work_dirs/pointpillars_image_radar_3class_bs4'
+work_dir = './work_dirs/pointpillars_radar_baseline_3class_80e_bs6'
 
 vis_backends = [
     dict(type='LocalVisBackend'),
@@ -29,7 +29,7 @@ visualizer = dict(
 
 dataset_type = 'RadarDataset'
 data_root = 'dataset/radar/'
-input_modality = dict(use_lidar=True, use_camera=True)
+input_modality = dict(use_lidar=True, use_camera=False)
 backend_args = None
 point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]
 voxel_size = [0.16, 0.16, 4]
@@ -48,8 +48,12 @@ anchor_sizes = [
     [1.946, 0.777, 1.751],
 ]
 
+# Baseline comparison order:
+# 1. Train/evaluate this pure PointPillars radar baseline.
+# 2. Compare with configs/pointpillars/pointpillars_image_radar.py.
+# 3. Compare with later improved fusion/RL/text/consistency variants.
 model = dict(
-    type='ImagePointVoxelNet',
+    type='VoxelNet',
     data_preprocessor=dict(
         type='Det3DDataPreprocessor',
         voxel=True,
@@ -57,11 +61,7 @@ model = dict(
             max_num_points=32,
             point_cloud_range=point_cloud_range,
             voxel_size=voxel_size,
-            max_voxels=(16000, 40000)),
-        mean=[123.675, 116.28, 103.53],
-        std=[58.395, 57.12, 57.375],
-        bgr_to_rgb=True,
-        pad_size_divisor=32),
+            max_voxels=(16000, 40000))),
     voxel_encoder=dict(
         type='PillarFeatureNet',
         in_channels=4,
@@ -82,27 +82,6 @@ model = dict(
         in_channels=[64, 128, 256],
         upsample_strides=[1, 2, 4],
         out_channels=[128, 128, 128]),
-    img_backbone=dict(
-        type='mmdet.ResNet',
-        depth=50,
-        num_stages=4,
-        out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
-        norm_cfg=dict(type='BN', requires_grad=True),
-        norm_eval=True,
-        style='pytorch'),
-    img_neck=dict(
-        type='mmdet.FPN',
-        in_channels=[256, 512, 1024, 2048],
-        out_channels=256,
-        num_outs=4),
-    fusion=dict(
-        type='ImageRadarBEVFusion',
-        image_channels=256,
-        bev_channels=384,
-        point_cloud_range=point_cloud_range,
-        height_samples=[-1.0, 0.0, 1.0],
-        image_dropout=0.1),
     bbox_head=dict(
         type='Anchor3DHead',
         num_classes=len(class_names),
@@ -159,8 +138,6 @@ train_pipeline = [
         load_dim=7,
         use_dim=[0, 1, 2, 3],
         backend_args=backend_args),
-    dict(type='LoadImageFromFile', backend_args=backend_args),
-    dict(type='mmdet.Resize', scale=(704, 256), keep_ratio=True),
     dict(type='LoadAnnotations3D', with_bbox_3d=True, with_label_3d=True),
     dict(type='RandomFlip3D', flip_ratio_bev_horizontal=0.5),
     dict(
@@ -172,7 +149,7 @@ train_pipeline = [
     dict(type='PointShuffle'),
     dict(
         type='Pack3DDetInputs',
-        keys=['points', 'img', 'gt_bboxes_3d', 'gt_labels_3d'])
+        keys=['points', 'gt_bboxes_3d', 'gt_labels_3d'])
 ]
 
 test_pipeline = [
@@ -182,8 +159,6 @@ test_pipeline = [
         load_dim=7,
         use_dim=[0, 1, 2, 3],
         backend_args=backend_args),
-    dict(type='LoadImageFromFile', backend_args=backend_args),
-    dict(type='mmdet.Resize', scale=(704, 256), keep_ratio=True),
     dict(
         type='MultiScaleFlipAug3D',
         img_scale=(1333, 800),
@@ -199,11 +174,11 @@ test_pipeline = [
             dict(
                 type='PointsRangeFilter', point_cloud_range=point_cloud_range)
         ]),
-    dict(type='Pack3DDetInputs', keys=['points', 'img'])
+    dict(type='Pack3DDetInputs', keys=['points'])
 ]
 
 train_dataloader = dict(
-    batch_size=4,
+    batch_size=8,
     num_workers=4,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
@@ -214,7 +189,7 @@ train_dataloader = dict(
             type=dataset_type,
             data_root=data_root,
             ann_file='radar_infos_train.pkl',
-            data_prefix=dict(pts='training/velodyne', img='training/image_2'),
+            data_prefix=dict(pts='training/velodyne'),
             pipeline=train_pipeline,
             modality=input_modality,
             test_mode=False,
@@ -232,7 +207,7 @@ val_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         ann_file='radar_infos_val.pkl',
-        data_prefix=dict(pts='training/velodyne', img='training/image_2'),
+        data_prefix=dict(pts='training/velodyne'),
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
@@ -250,7 +225,7 @@ test_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         ann_file='radar_infos_test.pkl',
-        data_prefix=dict(pts='training/velodyne', img='training/image_2'),
+        data_prefix=dict(pts='training/velodyne'),
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
@@ -268,28 +243,53 @@ test_evaluator = dict(
     ann_file=data_root + 'radar_infos_test.pkl',
     metric='bbox',
     format_only=True,
-    pklfile_prefix='work_dirs/pointpillars_image_radar_test/predictions',
-    submission_prefix='work_dirs/pointpillars_image_radar_test/submission',
+    pklfile_prefix='work_dirs/pointpillars_radar_baseline_test/predictions',
+    submission_prefix='work_dirs/pointpillars_radar_baseline_test/submission',
     backend_args=backend_args)
 
-lr = 0.00005
-epoch_num = 12
+lr = 0.001
+epoch_num = 80
+warmup_epochs = int(epoch_num * 0.4)
 optim_wrapper = dict(
     type='OptimWrapper',
-    optimizer=dict(type='AdamW', lr=lr, weight_decay=0.01),
-    clip_grad=dict(max_norm=5, norm_type=2))
+    optimizer=dict(type='AdamW', lr=lr, betas=(0.95, 0.99), weight_decay=0.01),
+    clip_grad=dict(max_norm=35, norm_type=2))
 param_scheduler = [
     dict(
         type='CosineAnnealingLR',
-        T_max=epoch_num,
-        eta_min=lr * 0.02,
+        T_max=warmup_epochs,
+        eta_min=lr * 10,
         begin=0,
+        end=warmup_epochs,
+        by_epoch=True,
+        convert_to_iter_based=True),
+    dict(
+        type='CosineAnnealingLR',
+        T_max=epoch_num - warmup_epochs,
+        eta_min=lr * 1e-4,
+        begin=warmup_epochs,
+        end=epoch_num,
+        by_epoch=True,
+        convert_to_iter_based=True),
+    dict(
+        type='CosineAnnealingMomentum',
+        T_max=warmup_epochs,
+        eta_min=0.85 / 0.95,
+        begin=0,
+        end=warmup_epochs,
+        by_epoch=True,
+        convert_to_iter_based=True),
+    dict(
+        type='CosineAnnealingMomentum',
+        T_max=epoch_num - warmup_epochs,
+        eta_min=1,
+        begin=warmup_epochs,
         end=epoch_num,
         by_epoch=True,
         convert_to_iter_based=True)
 ]
 
-train_cfg = dict(by_epoch=True, max_epochs=epoch_num, val_interval=2)
+train_cfg = dict(by_epoch=True, max_epochs=epoch_num, val_interval=5)
 val_cfg = dict()
 test_cfg = dict()
-auto_scale_lr = dict(enable=False, base_batch_size=32)
+auto_scale_lr = dict(enable=False, base_batch_size=48)
