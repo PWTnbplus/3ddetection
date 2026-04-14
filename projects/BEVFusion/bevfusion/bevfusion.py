@@ -168,7 +168,9 @@ class BEVFusion(Base3DDetector):
         with torch.autocast('cuda', enabled=False):
             points = [point.float() for point in points]
             feats, coords, sizes = self.voxelize(points)
-            batch_size = coords[-1, 0] + 1
+            # Keep empty radar/point samples in the batch. Inferring from
+            # coords drops trailing empty samples and breaks image-point fusion.
+            batch_size = len(points)
         x = self.pts_middle_encoder(feats, coords, batch_size)
         return x
 
