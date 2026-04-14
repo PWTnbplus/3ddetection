@@ -58,7 +58,8 @@ model = dict(
             point_cloud_range=point_cloud_range,
             voxel_size=voxel_size,
             max_voxels=[120000, 160000],
-            voxelize_reduce=True)),
+            voxelize_reduce=True,
+            deterministic=False)),
     pts_voxel_encoder=dict(type='HardSimpleVFE', num_features=7),
     pts_middle_encoder=dict(
         type='BEVFusionSparseEncoder',
