@@ -4,7 +4,7 @@ default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=50),
     param_scheduler=dict(type='ParamSchedulerHook'),
-    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=8),
+    checkpoint=dict(type='CheckpointHook', interval=5, max_keep_ckpts=6),
     sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(type='Det3DVisualizationHook'))
 
@@ -18,7 +18,7 @@ log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 log_level = 'INFO'
 load_from = None
 resume = False
-work_dir = './work_dirs/pointpillars_image_radar_3class_bs4'
+work_dir = './work_dirs/pointpillars_image_radar_7d_local'
 
 vis_backends = [
     dict(type='LocalVisBackend'),
@@ -27,25 +27,26 @@ vis_backends = [
 visualizer = dict(
     type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
-dataset_type = 'RadarDataset'
-data_root = '/root/lanyun-fs/dataset/radar/'
+dataset_type = 'KittiDataset'
+data_root = '/root/lanyun-fs/dataset/radar_5frames/'
 input_modality = dict(use_lidar=True, use_camera=True)
 backend_args = None
-point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]
-voxel_size = [0.16, 0.16, 4]
-class_names = ['Car', 'Pedestrian', 'Cyclist']
+data_prefix = dict(pts='', img='')
+point_cloud_range = [0, -25.6, -3, 51.2, 25.6, 2]
+voxel_size = [0.16, 0.16, 5]
+class_names = ['Pedestrian', 'Cyclist', 'Car']
 metainfo = dict(classes=class_names)
 
 anchor_ranges = [
-    [0, -39.68, -1.78, 69.12, 39.68, -1.78],
-    [0, -39.68, -0.6, 69.12, 39.68, -0.6],
-    [0, -39.68, -0.6, 69.12, 39.68, -0.6],
+    [0, -25.6, -0.6, 51.2, 25.6, -0.6],
+    [0, -25.6, -0.6, 51.2, 25.6, -0.6],
+    [0, -25.6, -1.78, 51.2, 25.6, -1.78],
 ]
 
 anchor_sizes = [
-    [4.165, 1.839, 1.573],
-    [0.649, 0.637, 1.650],
-    [1.946, 0.777, 1.751],
+    [0.8, 0.6, 1.73],
+    [1.76, 0.6, 1.73],
+    [3.9, 1.6, 1.56],
 ]
 
 model = dict(
@@ -54,7 +55,7 @@ model = dict(
         type='Det3DDataPreprocessor',
         voxel=True,
         voxel_layer=dict(
-            max_num_points=32,
+            max_num_points=10,
             point_cloud_range=point_cloud_range,
             voxel_size=voxel_size,
             max_voxels=(16000, 40000)),
@@ -63,14 +64,14 @@ model = dict(
         bgr_to_rgb=True,
         pad_size_divisor=32),
     voxel_encoder=dict(
-        type='PillarFeatureNet',
-        in_channels=4,
+        type='Radar7PillarFeatureNet',
+        in_channels=0,
         feat_channels=[64],
         with_distance=False,
         voxel_size=voxel_size,
         point_cloud_range=point_cloud_range),
     middle_encoder=dict(
-        type='PointPillarsScatter', in_channels=64, output_shape=[496, 432]),
+        type='PointPillarsScatter', in_channels=64, output_shape=[320, 320]),
     backbone=dict(
         type='SECOND',
         in_channels=64,
@@ -138,7 +139,21 @@ model = dict(
                 pos_iou_thr=0.5,
                 neg_iou_thr=0.35,
                 min_pos_iou=0.35,
-                ignore_iof_thr=-1) for _ in class_names
+                ignore_iof_thr=-1),
+            dict(
+                type='Max3DIoUAssigner',
+                iou_calculator=dict(type='mmdet3d.BboxOverlapsNearest3D'),
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.35,
+                min_pos_iou=0.35,
+                ignore_iof_thr=-1),
+            dict(
+                type='Max3DIoUAssigner',
+                iou_calculator=dict(type='mmdet3d.BboxOverlapsNearest3D'),
+                pos_iou_thr=0.6,
+                neg_iou_thr=0.45,
+                min_pos_iou=0.45,
+                ignore_iof_thr=-1)
         ],
         allowed_border=0,
         pos_weight=-1,
@@ -157,7 +172,7 @@ train_pipeline = [
         type='LoadPointsFromFile',
         coord_type='LIDAR',
         load_dim=7,
-        use_dim=[0, 1, 2, 3],
+        use_dim=[0, 1, 2, 3, 4, 5, 6],
         backend_args=backend_args),
     dict(type='LoadImageFromFile', backend_args=backend_args),
     dict(type='mmdet.Resize', scale=(704, 256), keep_ratio=True),
@@ -180,7 +195,7 @@ test_pipeline = [
         type='LoadPointsFromFile',
         coord_type='LIDAR',
         load_dim=7,
-        use_dim=[0, 1, 2, 3],
+        use_dim=[0, 1, 2, 3, 4, 5, 6],
         backend_args=backend_args),
     dict(type='LoadImageFromFile', backend_args=backend_args),
     dict(type='mmdet.Resize', scale=(704, 256), keep_ratio=True),
@@ -208,19 +223,16 @@ train_dataloader = dict(
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
     dataset=dict(
-        type='RepeatDataset',
-        times=2,
-        dataset=dict(
-            type=dataset_type,
-            data_root=data_root,
-            ann_file='radar_infos_train.pkl',
-            data_prefix=dict(pts='training/velodyne', img='training/image_2'),
-            pipeline=train_pipeline,
-            modality=input_modality,
-            test_mode=False,
-            metainfo=metainfo,
-            box_type_3d='LiDAR',
-            backend_args=backend_args)))
+        type=dataset_type,
+        data_root=data_root,
+        ann_file='kitti_infos_train.pkl',
+        data_prefix=data_prefix,
+        pipeline=train_pipeline,
+        modality=input_modality,
+        test_mode=False,
+        metainfo=metainfo,
+        box_type_3d='LiDAR',
+        backend_args=backend_args))
 
 val_dataloader = dict(
     batch_size=1,
@@ -231,8 +243,8 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_val.pkl',
-        data_prefix=dict(pts='training/velodyne', img='training/image_2'),
+        ann_file='kitti_infos_val.pkl',
+        data_prefix=data_prefix,
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
@@ -249,8 +261,8 @@ test_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_test.pkl',
-        data_prefix=dict(pts='training/velodyne', img='training/image_2'),
+        ann_file='kitti_infos_val.pkl',
+        data_prefix=data_prefix,
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
@@ -260,36 +272,53 @@ test_dataloader = dict(
 
 val_evaluator = dict(
     type='KittiMetric',
-    ann_file=data_root + 'radar_infos_val.pkl',
+    ann_file=data_root + 'kitti_infos_val.pkl',
     metric='bbox',
     backend_args=backend_args)
 test_evaluator = dict(
     type='KittiMetric',
-    ann_file=data_root + 'radar_infos_test.pkl',
+    ann_file=data_root + 'kitti_infos_val.pkl',
     metric='bbox',
-    format_only=True,
-    pklfile_prefix='work_dirs/pointpillars_image_radar_test/predictions',
-    submission_prefix='work_dirs/pointpillars_image_radar_test/submission',
     backend_args=backend_args)
 
-lr = 0.00005
-epoch_num = 12
+lr = 0.0002
+epoch_num = 60
 optim_wrapper = dict(
     type='OptimWrapper',
     optimizer=dict(type='AdamW', lr=lr, weight_decay=0.01),
-    clip_grad=dict(max_norm=5, norm_type=2))
+    clip_grad=dict(max_norm=35, norm_type=2))
 param_scheduler = [
     dict(
-        type='CosineAnnealingLR',
-        T_max=epoch_num,
-        eta_min=lr * 0.02,
+        type='LinearLR',
+        start_factor=0.33333333,
+        by_epoch=False,
         begin=0,
+        end=500),
+    dict(
+        type='CosineAnnealingLR',
+        begin=0,
+        T_max=epoch_num,
+        end=epoch_num,
+        eta_min_ratio=1e-4,
+        by_epoch=True,
+        convert_to_iter_based=True),
+    dict(
+        type='CosineAnnealingMomentum',
+        eta_min=0.85 / 0.95,
+        begin=0,
+        end=24,
+        by_epoch=True,
+        convert_to_iter_based=True),
+    dict(
+        type='CosineAnnealingMomentum',
+        eta_min=1,
+        begin=24,
         end=epoch_num,
         by_epoch=True,
         convert_to_iter_based=True)
 ]
 
-train_cfg = dict(by_epoch=True, max_epochs=epoch_num, val_interval=2)
+train_cfg = dict(by_epoch=True, max_epochs=epoch_num, val_interval=1)
 val_cfg = dict()
 test_cfg = dict()
 auto_scale_lr = dict(enable=False, base_batch_size=32)
