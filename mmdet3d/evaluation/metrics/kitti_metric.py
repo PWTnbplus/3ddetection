@@ -56,6 +56,7 @@ class KittiMetric(BaseMetric):
                  prefix: Optional[str] = None,
                  pklfile_prefix: Optional[str] = None,
                  default_cam_key: str = 'CAM2',
+                 dataset: str = 'KITTI',
                  format_only: bool = False,
                  submission_prefix: Optional[str] = None,
                  collect_device: str = 'cpu',
@@ -75,6 +76,8 @@ class KittiMetric(BaseMetric):
 
         self.submission_prefix = submission_prefix
         self.default_cam_key = default_cam_key
+        self.dataset = dataset
+        self.is_vod = dataset.lower() in ('vod', 'radar')
         self.backend_args = backend_args
 
         allowed_metrics = ['bbox', 'img_bbox', 'mAP', 'LET_mAP']
@@ -103,7 +106,6 @@ class KittiMetric(BaseMetric):
                 if len(annos['instances']) == 0:
                     kitti_annos = {
                         'name': np.array([]),
-                        'truncated': np.array([]),
                         'occluded': np.array([]),
                         'alpha': np.array([]),
                         'bbox': np.zeros([0, 4]),
@@ -112,10 +114,11 @@ class KittiMetric(BaseMetric):
                         'rotation_y': np.array([]),
                         'score': np.array([]),
                     }
+                    if not self.is_vod:
+                        kitti_annos['truncated'] = np.array([])
                 else:
                     kitti_annos = {
                         'name': [],
-                        'truncated': [],
                         'occluded': [],
                         'alpha': [],
                         'bbox': [],
@@ -124,10 +127,14 @@ class KittiMetric(BaseMetric):
                         'rotation_y': [],
                         'score': []
                     }
+                    if not self.is_vod:
+                        kitti_annos['truncated'] = []
                     for instance in annos['instances']:
                         label = instance['bbox_label']
                         kitti_annos['name'].append(label2cat[label])
-                        kitti_annos['truncated'].append(instance['truncated'])
+                        if not self.is_vod:
+                            kitti_annos['truncated'].append(
+                                instance.get('truncated', 0.0))
                         kitti_annos['occluded'].append(instance['occluded'])
                         kitti_annos['alpha'].append(instance['alpha'])
                         kitti_annos['bbox'].append(instance['bbox'])
@@ -242,7 +249,11 @@ class KittiMetric(BaseMetric):
             else:
                 eval_types = ['bbox', 'bev', '3d']
             ap_result_str, ap_dict_ = kitti_eval(
-                gt_annos, results_dict[name], classes, eval_types=eval_types)
+                gt_annos,
+                results_dict[name],
+                classes,
+                eval_types=eval_types,
+                dataset=self.dataset)
             for ap_type, ap in ap_dict_.items():
                 ap_dict[f'{name}/{ap_type}'] = float(f'{ap:.4f}')
 
