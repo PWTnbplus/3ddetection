@@ -252,7 +252,7 @@ train_dataloader = dict(
     batch_size=8,
     dataset=dict(
         dataset=dict(
-            ann_file='kitti_infos_train.pkl',
+            ann_file='radar_infos_train.pkl',
             backend_args=None,
             box_type_3d='LiDAR',
             data_prefix=dict(pts=''),
@@ -271,8 +271,8 @@ train_dataloader = dict(
 """test_dataloader = dict(
     batch_size=1,
     dataset=dict(
-        # ann_file='kitti_infos_val.pkl',
-        ann_file='kitti_infos_test.pkl',
+        # ann_file='radar_infos_val.pkl',
+        ann_file='radar_infos_test.pkl',
         backend_args=None,
         box_type_3d='LiDAR',
         data_prefix=dict(pts=''),
@@ -289,13 +289,13 @@ train_dataloader = dict(
 """
 
 # test_evaluator = dict(
-#     ann_file='data/vod/radar_5frames/kitti_infos_val.pkl',
+#     ann_file='data/vod/radar_5frames/radar_infos_val.pkl',
 #     backend_args=None,
 #     metric='bbox',
 #     type='KittiMetric') # for eval locally
 """test_evaluator = dict(
     type='KittiMetric',
-    ann_file='/root/lanyun-fs/dataset/kitti_infos_test.pkl',
+    ann_file='/root/lanyun-fs/dataset/radar_infos_test.pkl',
     metric='bbox',
     format_only=True,
     submission_prefix='results/kitti-3class/kitti_results') # for submission
@@ -311,7 +311,7 @@ val_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         data_prefix=dict(pts=''),
-        ann_file='kitti_infos_val.pkl',
+        ann_file='radar_infos_val.pkl',
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
@@ -319,7 +319,7 @@ val_dataloader = dict(
         box_type_3d='LiDAR'))
 
 val_evaluator = dict(
-    ann_file='/root/lanyun-fs/dataset/radar_5frames/kitti_infos_val.pkl',
+    ann_file='/root/lanyun-fs/dataset/radar_5frames/radar_infos_val.pkl',
     backend_args=None,
     metric='bbox',
     type='KittiMetric')

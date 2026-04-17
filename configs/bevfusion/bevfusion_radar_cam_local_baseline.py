@@ -305,7 +305,7 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='kitti_infos_train.pkl',
+        ann_file='radar_infos_train.pkl',
         pipeline=train_pipeline,
         metainfo=metainfo,
         modality=input_modality,
@@ -322,7 +322,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='kitti_infos_val.pkl',
+        ann_file='radar_infos_val.pkl',
         pipeline=test_pipeline,
         metainfo=metainfo,
         modality=input_modality,
@@ -335,7 +335,7 @@ test_dataloader = val_dataloader
 
 val_evaluator = dict(
     type='KittiMetric',
-    ann_file=data_root + 'kitti_infos_val.pkl',
+    ann_file=data_root + 'radar_infos_val.pkl',
     metric='bbox',
     backend_args=backend_args)
 test_evaluator = val_evaluator
@@ -382,4 +382,3 @@ optim_wrapper = dict(
     clip_grad=dict(max_norm=35, norm_type=2))
 
 auto_scale_lr = dict(enable=False, base_batch_size=32)
-
