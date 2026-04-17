@@ -121,6 +121,18 @@ def validate_lidar_7d(lidar_path: Path) -> None:
             'reshaped to VOD radar points with shape (-1, 7).')
 
 
+def choose_sample_folder(data_root: Path, split: str, sample_id: str) -> str:
+    """Choose the folder that contains this sample."""
+    candidates = ['testing', 'training'] if split == 'test' else [
+        'training', 'testing'
+    ]
+    for folder in candidates:
+        lidar_path = data_root / folder / 'velodyne' / f'{sample_id}.bin'
+        if lidar_path.exists():
+            return folder
+    return candidates[0]
+
+
 def parse_label_file(label_path: Path, categories: Dict[str, int]) -> List[Dict]:
     """Parse VOD labels without treating column 2 as truncated.
 
@@ -163,11 +175,18 @@ def parse_label_file(label_path: Path, categories: Dict[str, int]) -> List[Dict]
 
 def build_data_info(data_root: Path, sample_id: str, data_index: int,
                     categories: Dict[str, int],
+                    split: str = 'train',
                     check_lidar: bool = True) -> Dict:
-    image_path = data_root / 'training' / 'image_2' / f'{sample_id}.jpg'
-    lidar_path = data_root / 'training' / 'velodyne' / f'{sample_id}.bin'
-    calib_path = data_root / 'training' / 'calib' / f'{sample_id}.txt'
-    label_path = data_root / 'training' / 'label_2' / f'{sample_id}.txt'
+    sample_folder = choose_sample_folder(data_root, split, sample_id)
+    image_rel_path = Path(sample_folder) / 'image_2' / f'{sample_id}.jpg'
+    lidar_rel_path = Path(sample_folder) / 'velodyne' / f'{sample_id}.bin'
+    calib_rel_path = Path(sample_folder) / 'calib' / f'{sample_id}.txt'
+    label_rel_path = Path(sample_folder) / 'label_2' / f'{sample_id}.txt'
+
+    image_path = data_root / image_rel_path
+    lidar_path = data_root / lidar_rel_path
+    calib_path = data_root / calib_rel_path
+    label_path = data_root / label_rel_path
 
     if check_lidar:
         validate_lidar_7d(lidar_path)
@@ -180,7 +199,7 @@ def build_data_info(data_root: Path, sample_id: str, data_index: int,
         token=sample_id,
         images=dict(
             CAM2=dict(
-                img_path=image_path.name,
+                img_path=image_rel_path.as_posix(),
                 height=height,
                 width=width,
                 cam2img=calib['P2'].tolist(),
@@ -188,10 +207,11 @@ def build_data_info(data_root: Path, sample_id: str, data_index: int,
                 lidar2img=(calib['P2'] @ lidar2cam).tolist())),
         lidar_points=dict(
             num_pts_feats=7,
-            lidar_path=lidar_path.name,
+            lidar_path=lidar_rel_path.as_posix(),
             Tr_velo_to_cam=calib['Tr_velo_to_cam'].tolist(),
             Tr_imu_to_velo=calib['Tr_imu_to_velo'].tolist()),
-        point_cloud=dict(num_features=7, velodyne_path=lidar_path.name),
+        point_cloud=dict(
+            num_features=7, velodyne_path=lidar_rel_path.as_posix()),
         instances=parse_label_file(label_path, categories))
 
 
@@ -207,7 +227,8 @@ def convert_split(data_root: Path, split: str,
             print(f'[{split}] converting {index}/{total}')
         data_list.append(
             build_data_info(
-                data_root, sample_id, index - 1, categories, check_lidar))
+                data_root, sample_id, index - 1, categories, split,
+                check_lidar))
     return data_list
 
 
