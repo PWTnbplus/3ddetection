@@ -8,6 +8,7 @@ from tools.dataset_converters import indoor_converter as indoor
 from tools.dataset_converters import kitti_converter as kitti
 from tools.dataset_converters import lyft_converter as lyft_converter
 from tools.dataset_converters import nuscenes_converter as nuscenes_converter
+from tools.dataset_converters import radar_converter
 from tools.dataset_converters import semantickitti_converter
 from tools.dataset_converters.create_gt_database import (
     GTDatabaseCreater, create_groundtruth_database)
@@ -265,6 +266,29 @@ def semantickitti_data_prep(info_prefix, out_dir):
         info_prefix, out_dir)
 
 
+def radar_data_prep(root_path,
+                    info_prefix,
+                    out_dir,
+                    splits=('train', 'val', 'test'),
+                    only_gt_database=False):
+    """Prepare VOD radar infos without using KITTI truncated semantics."""
+    if only_gt_database:
+        create_groundtruth_database(
+            'RadarDataset',
+            root_path,
+            info_prefix,
+            f'{info_prefix}_infos_train.pkl',
+            relative_path=False)
+        return
+
+    radar_converter.create_vod_infos(
+        data_root=root_path,
+        out_dir=out_dir,
+        pkl_prefix=info_prefix,
+        splits=list(splits),
+        check_lidar=True)
+
+
 parser = argparse.ArgumentParser(description='Data converter arg parser')
 parser.add_argument('dataset', metavar='kitti', help='name of the dataset')
 parser.add_argument(
@@ -416,5 +440,11 @@ if __name__ == '__main__':
     elif args.dataset == 'semantickitti':
         semantickitti_data_prep(
             info_prefix=args.extra_tag, out_dir=args.out_dir)
+    elif args.dataset in ['radar', 'vod']:
+        radar_data_prep(
+            root_path=args.root_path,
+            info_prefix=args.extra_tag,
+            out_dir=args.out_dir,
+            only_gt_database=args.only_gt_database)
     else:
         raise NotImplementedError(f'Don\'t support {args.dataset} dataset.')

@@ -1113,6 +1113,42 @@ def generate_waymo_camera_instances(ori_info_dict, cam_keys):
     return empty_multicamera_instances
 
 
+def update_radar_infos(pkl_path, out_dir):
+    """Sanitize VOD radar infos.
+
+    The radar converter already writes V2-style infos. This function is a
+    conservative cleanup path for older generated pkl files: keep 7-D point
+    metadata and remove any stale KITTI ``truncated`` field.
+    """
+    print(f'{pkl_path} will be sanitized as VOD radar infos.')
+    mmengine.mkdir_or_exist(out_dir)
+    infos = mmengine.load(pkl_path)
+
+    if isinstance(infos, dict) and 'data_list' in infos:
+        data_list = infos['data_list']
+        metainfo = infos.setdefault('metainfo', {})
+    else:
+        data_list = infos
+        metainfo = {}
+        infos = dict(metainfo=metainfo, data_list=data_list)
+
+    metainfo['dataset'] = 'radar'
+    metainfo.setdefault('info_version', '1.1')
+
+    for data_info in data_list:
+        lidar_points = data_info.setdefault('lidar_points', {})
+        lidar_points['num_pts_feats'] = 7
+        point_cloud = data_info.setdefault('point_cloud', {})
+        point_cloud['num_features'] = 7
+        for instance in data_info.get('instances', []):
+            instance.pop('truncated', None)
+            instance.setdefault('difficulty', 0)
+
+    out_path = osp.join(out_dir, osp.basename(pkl_path))
+    mmengine.dump(infos, out_path)
+    print(f'Radar infos saved to {out_path}')
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Arg parser for data coords '
                                      'update due to coords sys refactor.')
@@ -1148,6 +1184,8 @@ def update_pkl_infos(dataset, out_dir, pkl_path):
         update_nuscenes_infos(pkl_path=pkl_path, out_dir=out_dir)
     elif dataset.lower() == 's3dis':
         update_s3dis_infos(pkl_path=pkl_path, out_dir=out_dir)
+    elif dataset.lower() in ['radar', 'vod']:
+        update_radar_infos(pkl_path=pkl_path, out_dir=out_dir)
     else:
         raise NotImplementedError(f'Do not support convert {dataset} to v2.')
 

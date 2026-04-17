@@ -218,6 +218,26 @@ def create_groundtruth_database(dataset_class_name,
                     backend_args=backend_args)
             ])
 
+    elif dataset_class_name == 'RadarDataset':
+        backend_args = None
+        dataset_cfg.update(
+            test_mode=False,
+            data_prefix=dict(pts='training/velodyne'),
+            modality=dict(use_lidar=True, use_camera=False),
+            pipeline=[
+                dict(
+                    type='LoadPointsFromFile',
+                    coord_type='LIDAR',
+                    load_dim=7,
+                    use_dim=7,
+                    backend_args=backend_args),
+                dict(
+                    type='LoadAnnotations3D',
+                    with_bbox_3d=True,
+                    with_label_3d=True,
+                    backend_args=backend_args)
+            ])
+
     dataset = DATASETS.build(dataset_cfg)
 
     if database_save_path is None:

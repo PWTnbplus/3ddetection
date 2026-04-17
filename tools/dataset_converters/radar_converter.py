@@ -4,7 +4,7 @@ import argparse
 import pickle
 import struct
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -22,7 +22,7 @@ DEFAULT_KEEP_CLASSES = [
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description='Convert the KITTI-style radar dataset to MMDet3D infos.')
+        description='Convert the VOD radar dataset to MMDet3D infos.')
     parser.add_argument(
         '--data-root',
         default='/root/lanyun-fs/dataset/radar',
@@ -43,8 +43,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         '--splits',
         nargs='+',
-        default=['train', 'val'],
+        default=['train', 'val', 'test'],
         help='ImageSets splits to convert.')
+    parser.add_argument(
+        '--skip-lidar-check',
+        action='store_true',
+        help='Skip checking that every .bin file is divisible by 7 floats.')
     return parser.parse_args()
 
 
@@ -99,7 +103,32 @@ def read_calib(calib_path: Path) -> Dict[str, np.ndarray]:
     return calib
 
 
+def parse_track_id(raw_value: str):
+    try:
+        value = float(raw_value)
+    except ValueError:
+        return raw_value
+    if value.is_integer():
+        return int(value)
+    return raw_value
+
+
+def validate_lidar_7d(lidar_path: Path) -> None:
+    num_float32 = lidar_path.stat().st_size // np.dtype(np.float32).itemsize
+    if lidar_path.stat().st_size % np.dtype(np.float32).itemsize != 0:
+        raise ValueError(f'{lidar_path} size is not aligned to float32.')
+    if num_float32 % 7 != 0:
+        raise ValueError(
+            f'{lidar_path} has {num_float32} float32 values, which cannot be '
+            'reshaped to VOD radar points with shape (-1, 7).')
+
+
 def parse_label_file(label_path: Path, categories: Dict[str, int]) -> List[Dict]:
+    """Parse VOD labels without treating column 2 as truncated.
+
+    In newer VOD annotations the second column is a track id. It must not be
+    stored as ``truncated`` and must not be used for difficulty.
+    """
     instances = []
     if not label_path.exists():
         return instances
@@ -122,25 +151,28 @@ def parse_label_file(label_path: Path, categories: Dict[str, int]) -> List[Dict]
             bbox_label=categories[name],
             bbox_3d=loc + [length, h, w, float(fields[14])],
             bbox_label_3d=categories[name],
-            truncated=float(fields[1]),
+            track_id=parse_track_id(fields[1]),
             occluded=int(float(fields[2])),
             alpha=float(fields[3]),
             score=float(fields[15]) if len(fields) > 15 else 0.0,
             index=group_id,
             group_id=group_id,
-            difficulty=int(float(fields[2])),
+            difficulty=0,
             num_lidar_pts=-1)
         instances.append(instance)
     return instances
 
 
 def build_data_info(data_root: Path, sample_id: str, data_index: int,
-                    categories: Dict[str, int]) -> Dict:
+                    categories: Dict[str, int],
+                    check_lidar: bool = True) -> Dict:
     image_path = data_root / 'training' / 'image_2' / f'{sample_id}.jpg'
     lidar_path = data_root / 'training' / 'velodyne' / f'{sample_id}.bin'
     calib_path = data_root / 'training' / 'calib' / f'{sample_id}.txt'
     label_path = data_root / 'training' / 'label_2' / f'{sample_id}.txt'
 
+    if check_lidar:
+        validate_lidar_7d(lidar_path)
     width, height = read_jpeg_size(image_path)
     calib = read_calib(calib_path)
     lidar2cam = calib['R0_rect'] @ calib['Tr_velo_to_cam']
@@ -161,11 +193,13 @@ def build_data_info(data_root: Path, sample_id: str, data_index: int,
             lidar_path=lidar_path.name,
             Tr_velo_to_cam=calib['Tr_velo_to_cam'].tolist(),
             Tr_imu_to_velo=calib['Tr_imu_to_velo'].tolist()),
+        point_cloud=dict(num_features=7, velodyne_path=lidar_path.name),
         instances=parse_label_file(label_path, categories))
 
 
 def convert_split(data_root: Path, split: str,
-                  categories: Dict[str, int]) -> List[Dict]:
+                  categories: Dict[str, int],
+                  check_lidar: bool = True) -> List[Dict]:
     split_file = data_root / 'ImageSets' / f'{split}.txt'
     sample_ids = read_split_ids(split_file)
     data_list = []
@@ -174,7 +208,8 @@ def convert_split(data_root: Path, split: str,
         if index == 1 or index == total or index % 500 == 0:
             print(f'[{split}] converting {index}/{total}')
         data_list.append(
-            build_data_info(data_root, sample_id, index - 1, categories))
+            build_data_info(
+                data_root, sample_id, index - 1, categories, check_lidar))
     return data_list
 
 
@@ -192,27 +227,45 @@ def dump_infos(data_list: List[Dict], out_path: Path,
     print(f'Saved {len(data_list)} samples to {out_path}')
 
 
-def main() -> None:
-    args = parse_args()
-    data_root = Path(args.data_root)
-    out_dir = Path(args.out_dir) if args.out_dir else data_root
-    categories = {name: DEFAULT_CLASSES.index(name) for name in args.class_names}
+def create_vod_infos(data_root: str,
+                     out_dir: Optional[str] = None,
+                     pkl_prefix: str = 'radar',
+                     class_names: Optional[List[str]] = None,
+                     splits: Optional[List[str]] = None,
+                     check_lidar: bool = True) -> Dict[str, List[Dict]]:
+    data_root = Path(data_root)
+    out_dir = Path(out_dir) if out_dir else data_root
+    class_names = class_names if class_names is not None else DEFAULT_KEEP_CLASSES
+    splits = splits if splits is not None else ['train', 'val', 'test']
+    categories = {name: DEFAULT_CLASSES.index(name) for name in class_names}
 
     split_infos = {}
-    for split in args.splits:
+    for split in splits:
         split_file = data_root / 'ImageSets' / f'{split}.txt'
         if not split_file.exists():
             print(f'Skip split "{split}" because {split_file} does not exist.')
             continue
-        data_list = convert_split(data_root, split, categories)
+        data_list = convert_split(data_root, split, categories, check_lidar)
         split_infos[split] = data_list
-        dump_infos(data_list, out_dir / f'{args.pkl_prefix}_infos_{split}.pkl',
+        dump_infos(data_list, out_dir / f'{pkl_prefix}_infos_{split}.pkl',
                    categories)
 
     if 'train' in split_infos and 'val' in split_infos:
         dump_infos(split_infos['train'] + split_infos['val'],
-                   out_dir / f'{args.pkl_prefix}_infos_trainval.pkl',
+                   out_dir / f'{pkl_prefix}_infos_trainval.pkl',
                    categories)
+    return split_infos
+
+
+def main() -> None:
+    args = parse_args()
+    create_vod_infos(
+        data_root=args.data_root,
+        out_dir=args.out_dir,
+        pkl_prefix=args.pkl_prefix,
+        class_names=args.class_names,
+        splits=args.splits,
+        check_lidar=not args.skip_lidar_check)
 
 
 if __name__ == '__main__':
