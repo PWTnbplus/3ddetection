@@ -352,11 +352,13 @@ test_dataloader = dict(
 
 val_evaluator = dict(
     type='KittiMetric',
+    dataset='VOD',
     ann_file=data_root + 'radar_infos_val.pkl',
     metric='bbox',
     backend_args=backend_args)
 test_evaluator = dict(
     type='KittiMetric',
+    dataset='VOD',
     ann_file=data_root + 'radar_infos_test.pkl',
     metric='bbox',
     backend_args=backend_args)

@@ -13,7 +13,8 @@ custom_imports = dict(
 work_dir = './work_dirs/pointpillars_image_radar_7d_rl_align'
 
 default_hooks = dict(
-    checkpoint=dict(_delete_=True, type='CheckpointHook', interval=1))
+    checkpoint=dict(
+        _delete_=True, type='CheckpointHook', interval=1, max_keep_ckpts=10))
 
 model = dict(
     type='ImagePointVoxelNetRLAlign',

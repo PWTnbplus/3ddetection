@@ -770,7 +770,7 @@ def kitti_eval(gt_annos,
                     postfix = f'{difficulty[idx]}_strict'
                 else:
                     postfix = f'{difficulty[idx]}_loose'
-                prefix = f'KITTI/{curcls_name}'
+                prefix = f'{dataset_prefix}/{curcls_name}'
                 if mAP11_3d is not None:
                     ret_dict[f'{prefix}_3D_AP11_{postfix}'] =\
                         mAP11_3d[j, idx, i]
@@ -806,12 +806,13 @@ def kitti_eval(gt_annos,
         for idx in range(3):
             postfix = f'{difficulty[idx]}'
             if mAP11_3d is not None:
-                ret_dict[f'KITTI/Overall_3D_AP11_{postfix}'] = mAP11_3d[idx, 0]
+                ret_dict[f'{dataset_prefix}/Overall_3D_AP11_{postfix}'] = \
+                    mAP11_3d[idx, 0]
             if mAP11_bev is not None:
-                ret_dict[f'KITTI/Overall_BEV_AP11_{postfix}'] =\
+                ret_dict[f'{dataset_prefix}/Overall_BEV_AP11_{postfix}'] =\
                     mAP11_bev[idx, 0]
             if mAP11_bbox is not None:
-                ret_dict[f'KITTI/Overall_2D_AP11_{postfix}'] =\
+                ret_dict[f'{dataset_prefix}/Overall_2D_AP11_{postfix}'] =\
                     mAP11_bbox[idx, 0]
 
     # Calculate AP40
@@ -843,7 +844,7 @@ def kitti_eval(gt_annos,
                     postfix = f'{difficulty[idx]}_strict'
                 else:
                     postfix = f'{difficulty[idx]}_loose'
-                prefix = f'KITTI/{curcls_name}'
+                prefix = f'{dataset_prefix}/{curcls_name}'
                 if mAP40_3d is not None:
                     ret_dict[f'{prefix}_3D_AP40_{postfix}'] =\
                         mAP40_3d[j, idx, i]
@@ -879,12 +880,13 @@ def kitti_eval(gt_annos,
         for idx in range(3):
             postfix = f'{difficulty[idx]}'
             if mAP40_3d is not None:
-                ret_dict[f'KITTI/Overall_3D_AP40_{postfix}'] = mAP40_3d[idx, 0]
+                ret_dict[f'{dataset_prefix}/Overall_3D_AP40_{postfix}'] = \
+                    mAP40_3d[idx, 0]
             if mAP40_bev is not None:
-                ret_dict[f'KITTI/Overall_BEV_AP40_{postfix}'] =\
+                ret_dict[f'{dataset_prefix}/Overall_BEV_AP40_{postfix}'] =\
                     mAP40_bev[idx, 0]
             if mAP40_bbox is not None:
-                ret_dict[f'KITTI/Overall_2D_AP40_{postfix}'] =\
+                ret_dict[f'{dataset_prefix}/Overall_2D_AP40_{postfix}'] =\
                     mAP40_bbox[idx, 0]
 
     return result, ret_dict

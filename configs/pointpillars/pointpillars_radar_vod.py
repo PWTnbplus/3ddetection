@@ -295,6 +295,7 @@ train_dataloader = dict(
 #     type='KittiMetric') # for eval locally
 """test_evaluator = dict(
     type='KittiMetric',
+    dataset='VOD',
     ann_file='/root/lanyun-fs/dataset/radar_infos_test.pkl',
     metric='bbox',
     format_only=True,
@@ -321,6 +322,7 @@ val_dataloader = dict(
 val_evaluator = dict(
     ann_file='/root/lanyun-fs/dataset/radar_5frames/radar_infos_val.pkl',
     backend_args=None,
+    dataset='VOD',
     metric='bbox',
     type='KittiMetric')
 
