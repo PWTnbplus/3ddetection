@@ -24,6 +24,18 @@ from mmdet3d.datasets.convert_utils import (convert_annos,
 from mmdet3d.datasets.utils import convert_quaternion_to_matrix
 from mmdet3d.structures import points_cam2img
 
+VOD_ORIGINAL_CLASSES = [
+    'bicycle', 'bicycle_rack', 'Car', 'Cyclist', 'human_depiction',
+    'moped_scooter', 'motor', 'Pedestrian', 'ride_other', 'ride_uncertain',
+    'rider', 'truck', 'vehicle_other'
+]
+VOD_TARGET_CLASSES = ['Pedestrian', 'Cyclist', 'Car']
+VOD_NAME_TO_LABEL = {name: idx for idx, name in enumerate(VOD_TARGET_CLASSES)}
+VOD_ORIGINAL_LABEL_TO_NAME = {
+    idx: name
+    for idx, name in enumerate(VOD_ORIGINAL_CLASSES)
+}
+
 
 def get_empty_instance():
     """Empty annotation for single instance."""
@@ -1134,15 +1146,28 @@ def update_radar_infos(pkl_path, out_dir):
 
     metainfo['dataset'] = 'radar'
     metainfo.setdefault('info_version', '1.1')
+    metainfo['categories'] = copy.deepcopy(VOD_NAME_TO_LABEL)
 
     for data_info in data_list:
         lidar_points = data_info.setdefault('lidar_points', {})
         lidar_points['num_pts_feats'] = 7
         point_cloud = data_info.setdefault('point_cloud', {})
         point_cloud['num_features'] = 7
+        kept_instances = []
         for instance in data_info.get('instances', []):
             instance.pop('truncated', None)
             instance.setdefault('difficulty', 0)
+            label = instance.get('bbox_label_3d', instance.get('bbox_label'))
+            name = instance.get('name') or instance.get('category_name')
+            if name is None:
+                name = VOD_ORIGINAL_LABEL_TO_NAME.get(label)
+            if name not in VOD_NAME_TO_LABEL:
+                continue
+            new_label = VOD_NAME_TO_LABEL[name]
+            instance['bbox_label'] = new_label
+            instance['bbox_label_3d'] = new_label
+            kept_instances.append(instance)
+        data_info['instances'] = kept_instances
 
     out_path = osp.join(out_dir, osp.basename(pkl_path))
     mmengine.dump(infos, out_path)

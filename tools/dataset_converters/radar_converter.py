@@ -15,9 +15,7 @@ DEFAULT_CLASSES = [
     'rider', 'truck', 'vehicle_other'
 ]
 
-DEFAULT_KEEP_CLASSES = [
-    'bicycle', 'Car', 'Cyclist', 'motor', 'Pedestrian', 'ride_other', 'truck'
-]
+DEFAULT_KEEP_CLASSES = ['Pedestrian', 'Cyclist', 'Car']
 
 
 def parse_args() -> argparse.Namespace:
@@ -237,7 +235,7 @@ def create_vod_infos(data_root: str,
     out_dir = Path(out_dir) if out_dir else data_root
     class_names = class_names if class_names is not None else DEFAULT_KEEP_CLASSES
     splits = splits if splits is not None else ['train', 'val', 'test']
-    categories = {name: DEFAULT_CLASSES.index(name) for name in class_names}
+    categories = {name: label for label, name in enumerate(class_names)}
 
     split_infos = {}
     for split in splits:
