@@ -1,5 +1,11 @@
 _base_ = './pointpillars_image_radar.py'
 
+# Local aliases are needed because variables from _base_ are not in this
+# config file's Python execution scope before MMEngine merges configs.
+point_cloud_range = [0, -25.6, -3, 51.2, 25.6, 2]
+class_names = ['Pedestrian', 'Cyclist', 'Car']
+
+
 custom_imports = dict(
     imports=[
         'mmdet3d.models.detectors.image_point_voxelnet_carq',
@@ -56,3 +62,4 @@ model = dict(
             init_bias=-2.0)))
 
 train_cfg = dict(val_interval=1)
+
