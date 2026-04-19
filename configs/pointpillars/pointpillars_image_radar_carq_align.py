@@ -30,9 +30,9 @@ model = dict(
         return_gate_stats=False),
     proposal_refiner=dict(
         type='RadarCameraProposalRefiner',
-        train_jitter_times=2,
-        max_train_proposals=192,
-        topk_test=(50, 50, 80),
+        train_jitter_times=1,
+        max_train_proposals=96,
+        topk_test=(30, 30, 50),
         score_thr=0.05,
         loss_refine_weight=1.0,
         loss_gate_weight=0.2,
@@ -41,14 +41,14 @@ model = dict(
         align_module=dict(
             type='InstanceCrossModalAlign',
             in_channels=384,
-            embed_dims=256,
+            embed_dims=128,
             point_cloud_range=point_cloud_range,
-            grid_size=7,
+            grid_size=5,
             # class order follows the config: Pedestrian, Cyclist, Car.
             enlarge_ratio=(2.0, 2.0, 1.5)),
         refine_head=dict(
             type='ClassAwareRefineHead',
-            embed_dims=256,
+            embed_dims=128,
             num_classes=len(class_names),
             class_dim_masks=(
                 (1.0, 1.0, 0.5, 0.2, 0.2, 0.5, 0.1),
@@ -56,10 +56,11 @@ model = dict(
                 (1.0, 1.0, 1.5, 1.5, 1.5, 1.2, 1.2))),
         quality_gate=dict(
             type='GeometryReliabilityGate',
-            embed_dims=256,
+            embed_dims=128,
             vector_gate=True,
             # Conservative start: early training stays close to coarse boxes.
             init_bias=-2.0)))
 
 train_cfg = dict(val_interval=1)
+
 

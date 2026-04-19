@@ -92,9 +92,46 @@ class InstanceCrossModalAlign(BaseModule):
         return torch.einsum('ng,ngd->nd', attn, tokens)
 
     def _grid_sample(self, feat: Tensor, grid: Tensor, batch_inds: Tensor) -> Tensor:
-        sampled = F.grid_sample(feat[batch_inds], grid, mode='bilinear', padding_mode='zeros', align_corners=True)
-        return sampled.flatten(2)
+        # Memory-light bilinear sampler for proposal ROIs. It gathers only the
+        # N * G * G queried BEV locations instead of invoking grid_sample on a
+        # full BEV map per proposal.
+        num_props, grid_h, grid_w, _ = grid.shape
+        batch_size, channels, height, width = feat.shape
+        num_points = grid_h * grid_w
+        if num_props == 0:
+            return feat.new_zeros((0, channels, num_points))
 
+        x = (grid[..., 0].clamp(-1, 1) + 1) * 0.5 * (width - 1)
+        y = (grid[..., 1].clamp(-1, 1) + 1) * 0.5 * (height - 1)
+        x0 = x.floor().long().clamp(0, width - 1)
+        y0 = y.floor().long().clamp(0, height - 1)
+        x1 = (x0 + 1).clamp(0, width - 1)
+        y1 = (y0 + 1).clamp(0, height - 1)
+
+        x0f = x0.to(dtype=feat.dtype)
+        y0f = y0.to(dtype=feat.dtype)
+        wx = (x.to(dtype=feat.dtype) - x0f).clamp(0, 1)
+        wy = (y.to(dtype=feat.dtype) - y0f).clamp(0, 1)
+        wa = ((1 - wx) * (1 - wy)).view(num_props, num_points)
+        wb = ((1 - wx) * wy).view(num_props, num_points)
+        wc = (wx * (1 - wy)).view(num_props, num_points)
+        wd = (wx * wy).view(num_props, num_points)
+
+        idx_a = (y0 * width + x0).view(num_props, num_points)
+        idx_b = (y1 * width + x0).view(num_props, num_points)
+        idx_c = (y0 * width + x1).view(num_props, num_points)
+        idx_d = (y1 * width + x1).view(num_props, num_points)
+
+        flat_feat = feat.flatten(2)
+        outputs = feat.new_zeros((num_props, channels, num_points))
+        for batch_idx in batch_inds.unique(sorted=True):
+            mask = batch_inds == batch_idx
+            src = flat_feat[int(batch_idx.item())]
+            for out_idx, weight in ((idx_a, wa), (idx_b, wb), (idx_c, wc), (idx_d, wd)):
+                gathered = src[:, out_idx[mask].reshape(-1)]
+                gathered = gathered.view(channels, int(mask.sum().item()), num_points).permute(1, 0, 2)
+                outputs[mask] += gathered * weight[mask].unsqueeze(1)
+        return outputs
     def _build_rotated_grid(self, boxes: Tensor, labels: Tensor, feat_hw: Tuple[int, int], device: torch.device) -> Tensor:
         g = self.grid_size
         base_y, base_x = torch.meshgrid(torch.linspace(-0.5, 0.5, g, device=device), torch.linspace(-0.5, 0.5, g, device=device), indexing='ij')
@@ -342,4 +379,6 @@ class RadarCameraProposalRefiner(BaseModule):
     def _class_balanced_mean(self, values: Tensor, labels: Tensor) -> Tensor:
         parts = [values[labels == cls].mean() for cls in labels.unique() if (labels == cls).any()]
         return torch.stack(parts).mean() if parts else values.mean()
+
+
 
