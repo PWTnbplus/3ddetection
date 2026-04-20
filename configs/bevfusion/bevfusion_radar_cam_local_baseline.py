@@ -37,7 +37,7 @@ class_names = ['Pedestrian', 'Cyclist', 'Car']
 
 metainfo = dict(classes=class_names)
 dataset_type = 'KittiDataset'
-data_root = '/root/lanyun-fs/dataset/radar_5frames/'
+data_root = '__VOD_BASE__'
 # The local pkl may already store paths like training/velodyne/xxxxx.bin and
 # training/image_2/xxxxx.jpg, so prefixes stay empty to avoid duplicated paths.
 data_prefix = dict(pts='', img='')
@@ -305,7 +305,7 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_train.pkl',
+        ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_train.pkl',
         pipeline=train_pipeline,
         metainfo=metainfo,
         modality=input_modality,
@@ -322,7 +322,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_val.pkl',
+        ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_val.pkl',
         pipeline=test_pipeline,
         metainfo=metainfo,
         modality=input_modality,
@@ -336,7 +336,7 @@ test_dataloader = val_dataloader
 val_evaluator = dict(
     type='KittiMetric',
     dataset='VOD',
-    ann_file=data_root + 'radar_infos_val.pkl',
+    ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_val.pkl',
     metric='bbox',
     backend_args=backend_args)
 test_evaluator = val_evaluator

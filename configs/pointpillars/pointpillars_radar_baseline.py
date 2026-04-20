@@ -28,7 +28,7 @@ visualizer = dict(
     type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
 dataset_type = 'RadarDataset'
-data_root = '/root/lanyun-fs/dataset/radar/'
+data_root = '__VOD_BASE__'
 input_modality = dict(use_lidar=True, use_camera=False)
 backend_args = None
 point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]
@@ -188,8 +188,8 @@ train_dataloader = dict(
         dataset=dict(
             type=dataset_type,
             data_root=data_root,
-            ann_file='radar_infos_train.pkl',
-            data_prefix=dict(pts='training/velodyne'),
+            ann_file='__INFO_ROOT_RADAR__/radar_infos_train.pkl',
+            data_prefix=dict(pts=''),
             pipeline=train_pipeline,
             modality=input_modality,
             test_mode=False,
@@ -206,8 +206,8 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_val.pkl',
-        data_prefix=dict(pts='training/velodyne'),
+        ann_file='__INFO_ROOT_RADAR__/radar_infos_val.pkl',
+        data_prefix=dict(pts=''),
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
@@ -224,8 +224,8 @@ test_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_test.pkl',
-        data_prefix=dict(pts='training/velodyne'),
+        ann_file='__INFO_ROOT_RADAR__/radar_infos_test.pkl',
+        data_prefix=dict(pts=''),
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
@@ -236,13 +236,13 @@ test_dataloader = dict(
 val_evaluator = dict(
     type='KittiMetric',
     dataset='VOD',
-    ann_file=data_root + 'radar_infos_val.pkl',
+    ann_file='__INFO_ROOT_RADAR__/radar_infos_val.pkl',
     metric='bbox',
     backend_args=backend_args)
 test_evaluator = dict(
     type='KittiMetric',
     dataset='VOD',
-    ann_file=data_root + 'radar_infos_test.pkl',
+    ann_file='__INFO_ROOT_RADAR__/radar_infos_test.pkl',
     metric='bbox',
     format_only=True,
     pklfile_prefix='work_dirs/pointpillars_radar_baseline_test/predictions',

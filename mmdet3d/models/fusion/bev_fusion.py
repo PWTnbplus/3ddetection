@@ -1,6 +1,7 @@
 from typing import Optional, Sequence
 
 import torch
+import torch.nn.functional as F
 from torch import Tensor, nn
 
 from mmdet3d.registry import MODELS
@@ -57,6 +58,7 @@ class ImageRadarBEVFusion(nn.Module):
             nn.BatchNorm2d(bev_channels),
             nn.ReLU(inplace=True),
         )
+        self._projection_cache = {}
 
     def forward(self,
                 radar_bev_feats,
@@ -110,31 +112,14 @@ class ImageRadarBEVFusion(nn.Module):
         dtype = torch.float32
         sample_img_feat = img_feat.float()
         _, _, bev_h, bev_w = target_feat.shape
-        x_min, y_min, z_min, x_max, y_max, z_max = self.point_cloud_range
-        xs = torch.linspace(
-            x_min, x_max, bev_w + 1, device=device, dtype=dtype)[:-1]
-        ys = torch.linspace(
-            y_min, y_max, bev_h + 1, device=device, dtype=dtype)[:-1]
-        xs = xs + (x_max - x_min) / bev_w * 0.5
-        ys = ys + (y_max - y_min) / bev_h * 0.5
-        grid_y, grid_x = torch.meshgrid(ys, xs, indexing='ij')
-        zs = torch.as_tensor(self.height_samples, device=device, dtype=dtype)
-        zs = zs[(zs >= z_min) & (zs <= z_max)]
-        if zs.numel() == 0:
-            zs = torch.as_tensor([(z_min + z_max) * 0.5],
-                                 device=device,
-                                 dtype=dtype)
-
-        ones = torch.ones_like(grid_x)
-        bev_samples = []
-        valid_samples = []
-        for z in zs:
-            grid_z = torch.full_like(grid_x, z)
-            bev_samples.append(
-                torch.stack([grid_x, grid_y, grid_z, ones], dim=-1))
-
-        points = torch.stack(bev_samples, dim=0).reshape(-1, 4)
+        cache = self._get_projection_cache(bev_h, bev_w, device, dtype)
+        base_points_xyz = cache['points_xyz']
+        points_ones = cache['points_ones']
+        base_points_hom = cache['points_hom']
+        zs_num = cache['zs_num']
         projected_feats = []
+        valid_samples = []
+
         for batch_idx, data_sample in enumerate(batch_data_samples):
             lidar2img = data_sample.metainfo.get('lidar2img', None)
             if lidar2img is None:
@@ -144,9 +129,12 @@ class ImageRadarBEVFusion(nn.Module):
 
             lidar2img = torch.as_tensor(lidar2img, device=device, dtype=dtype)
             lidar2img = lidar2img[:3, :4]
-            points_xyz = self._undo_3d_augmentation(
-                points[:, :3], data_sample.metainfo)
-            points_hom = torch.cat([points_xyz, points[:, 3:4]], dim=1)
+            if data_sample.metainfo.get('transformation_3d_flow', []):
+                sample_points_xyz = self._undo_3d_augmentation(
+                    base_points_xyz, data_sample.metainfo)
+                points_hom = torch.cat([sample_points_xyz, points_ones], dim=1)
+            else:
+                points_hom = base_points_hom
             projected = points_hom @ lidar2img.t()
             depth = projected[:, 2].clamp(min=1e-5)
             pixel_x = projected[:, 0] / depth
@@ -172,21 +160,20 @@ class ImageRadarBEVFusion(nn.Module):
             norm_x = pixel_x / img_shape_w * 2 - 1
             norm_y = pixel_y / img_shape_h * 2 - 1
             sample_grid = torch.stack([norm_x, norm_y], dim=-1)
-            sample_grid = sample_grid.view(1, zs.numel(), bev_h * bev_w, 2)
-            sampled = torch.nn.functional.grid_sample(
+            sample_grid = sample_grid.view(1, zs_num, bev_h * bev_w, 2)
+            sampled = F.grid_sample(
                 sample_img_feat[batch_idx:batch_idx + 1],
                 sample_grid,
                 mode='bilinear',
                 padding_mode='zeros',
                 align_corners=False)
-            sampled = sampled.view(1, sample_img_feat.shape[1], zs.numel(),
-                                   bev_h, bev_w)
+            sampled = sampled.view(1, sample_img_feat.shape[1], zs_num, bev_h,
+                                   bev_w)
 
             valid = ((pixel_x >= 0) & (pixel_x < img_shape_w) &
                      (pixel_y >= 0) & (pixel_y < img_shape_h) &
                      (projected[:, 2] > 1e-5))
-            valid = valid.view(1, 1, zs.numel(), bev_h, bev_w).to(
-                dtype=sampled.dtype)
+            valid = valid.view(1, 1, zs_num, bev_h, bev_w).to(dtype=sampled.dtype)
             projected_feats.append((sampled * valid).sum(dim=2))
             valid_samples.append(valid.sum(dim=2).clamp_min(1.0))
 
@@ -214,9 +201,50 @@ class ImageRadarBEVFusion(nn.Module):
                     metainfo['pcd_rotation'],
                     device=points.device,
                     dtype=points.dtype)
-                points = points @ torch.inverse(rotation)
+                points = points @ rotation.transpose(0, 1)
             elif op == 'HF':
                 points[:, 1] = -points[:, 1]
             elif op == 'VF':
                 points[:, 0] = -points[:, 0]
         return points
+
+    def _get_projection_cache(self, bev_h: int, bev_w: int,
+                              device: torch.device,
+                              dtype: torch.dtype) -> dict:
+        key = (bev_h, bev_w, tuple(self.height_samples),
+               tuple(self.point_cloud_range) if self.point_cloud_range else None,
+               device.type, device.index, str(dtype))
+        cached = self._projection_cache.get(key)
+        if cached is not None:
+            return cached
+
+        x_min, y_min, z_min, x_max, y_max, z_max = self.point_cloud_range
+        xs = torch.linspace(
+            x_min, x_max, bev_w + 1, device=device, dtype=dtype)[:-1]
+        ys = torch.linspace(
+            y_min, y_max, bev_h + 1, device=device, dtype=dtype)[:-1]
+        xs = xs + (x_max - x_min) / bev_w * 0.5
+        ys = ys + (y_max - y_min) / bev_h * 0.5
+        grid_y, grid_x = torch.meshgrid(ys, xs, indexing='ij')
+        zs = torch.as_tensor(self.height_samples, device=device, dtype=dtype)
+        zs = zs[(zs >= z_min) & (zs <= z_max)]
+        if zs.numel() == 0:
+            zs = torch.as_tensor([(z_min + z_max) * 0.5],
+                                 device=device,
+                                 dtype=dtype)
+
+        bev_samples = []
+        ones = torch.ones_like(grid_x)
+        for z in zs:
+            grid_z = torch.full_like(grid_x, z)
+            bev_samples.append(torch.stack([grid_x, grid_y, grid_z], dim=-1))
+        points_xyz = torch.stack(bev_samples, dim=0).reshape(-1, 3).contiguous()
+        cached = dict(
+            points_xyz=points_xyz,
+            points_ones=ones.reshape(-1, 1).repeat(zs.numel(), 1).contiguous(),
+            points_hom=None,
+            zs_num=zs.numel())
+        cached['points_hom'] = torch.cat(
+            [cached['points_xyz'], cached['points_ones']], dim=1).contiguous()
+        self._projection_cache[key] = cached
+        return cached

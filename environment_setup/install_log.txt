@@ -1,0 +1,857 @@
+﻿3DDetection 环境自动搭建安装日志
+生成时间: 2026-04-20 11:26:26
+
+===== 01_conda_create.log =====
+conda.exe : E:\resources\anaconda\Lib\site-packages\conda\base\context.py:201: FutureWarning: Adding 'defaults' to chan
+nel list implicitly is deprecated and will be removed in 25.3. 
+At line:2 char:78
++ ... ng]::new(); & E:\resources\anaconda\Scripts\conda.exe --no-plugins cr ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (E:\resources\an...moved in 25.3. :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+To remove this warning, please choose a default channel explicitly with conda's regular configuration system, e.g. by a
+dding 'defaults' to the list of channels:
+
+  conda config --add channels defaults
+
+For more information see https://docs.conda.io/projects/conda/en/stable/user-guide/configuration/use-condarc.html
+
+  deprecated.topic(
+Collecting package metadata (current_repodata.json): - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | failed
+
+CondaHTTPError: HTTP 000 CONNECTION FAILED for url <https://repo.anaconda.com/pkgs/main/win-64/current_repodata.json>
+Elapsed: -
+
+An HTTP error occurred when trying to retrieve this URL.
+HTTP errors are often intermittent, and a simple retry will get you on your way.
+
+If your current network has https://repo.anaconda.com blocked, please file
+a support request with your network engineering team.
+
+'https//repo.anaconda.com/pkgs/main/win-64'
+
+
+
+===== 02_base_toolchain.log =====
+Looking in indexes: https://pypi.org/simple, https://pypi.ngc.nvidia.com
+Requirement already satisfied: pip in d:\codex_envs\3ddet_env\lib\site-packages (23.2.1)
+Collecting pip
+  Obtaining dependency information for pip from https://files.pythonhosted.org/packages/de/f0/c81e05b613866b76d2d1066490adf1a3dbc4ee9d9c839961c3fc8a6997af/pip-26.0.1-py3-none-any.whl.metadata
+  Downloading pip-26.0.1-py3-none-any.whl.metadata (4.7 kB)
+Requirement already satisfied: setuptools in d:\codex_envs\3ddet_env\lib\site-packages (65.5.0)
+Collecting setuptools
+  Obtaining dependency information for setuptools from https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl.metadata
+  Downloading setuptools-82.0.1-py3-none-any.whl.metadata (6.5 kB)
+Collecting wheel
+  Obtaining dependency information for wheel from https://files.pythonhosted.org/packages/87/22/b76d483683216dde3d67cba61fb2444be8d5be289bf628c13fc0fd90e5f9/wheel-0.46.3-py3-none-any.whl.metadata
+  Downloading wheel-0.46.3-py3-none-any.whl.metadata (2.4 kB)
+Collecting cython
+  Obtaining dependency information for cython from https://files.pythonhosted.org/packages/32/e4/424a004d7c0d8a4050c81846ebbd22272ececfa9a498cb340aa44fccbec2/cython-3.2.4-cp311-cp311-win_amd64.whl.metadata
+  Downloading cython-3.2.4-cp311-cp311-win_amd64.whl.metadata (7.7 kB)
+Collecting ninja
+  Obtaining dependency information for ninja from https://files.pythonhosted.org/packages/29/45/c0adfbfb0b5895aa18cec400c535b4f7ff3e52536e0403602fc1a23f7de9/ninja-1.13.0-py3-none-win_amd64.whl.metadata
+  Downloading ninja-1.13.0-py3-none-win_amd64.whl.metadata (5.1 kB)
+Collecting cmake
+  Obtaining dependency information for cmake from https://files.pythonhosted.org/packages/2a/2a/a8db7d73a6941e9d4a177011137378b222cd6dcec383f1998f3594c73a0c/cmake-4.3.1-py3-none-win_amd64.whl.metadata
+  Downloading cmake-4.3.1-py3-none-win_amd64.whl.metadata (6.5 kB)
+Collecting packaging
+  Obtaining dependency information for packaging from https://files.pythonhosted.org/packages/7a/c2/920ef838e2f0028c8262f16101ec09ebd5969864e5a64c4c05fad0617c56/packaging-26.1-py3-none-any.whl.metadata
+  Downloading packaging-26.1-py3-none-any.whl.metadata (3.5 kB)
+Collecting openmim
+  Obtaining dependency information for openmim from https://files.pythonhosted.org/packages/00/b3/95531cee452028869d0e08974561f83e9c256c98f62c7a45a51893a61c54/openmim-0.3.9-py2.py3-none-any.whl.metadata
+  Downloading openmim-0.3.9-py2.py3-none-any.whl.metadata (16 kB)
+Collecting Click (from openmim)
+  Obtaining dependency information for Click from https://files.pythonhosted.org/packages/e4/20/71885d8b97d4f3dde17b1fdb92dbd4908b00541c5a3379787137285f602e/click-8.3.2-py3-none-any.whl.metadata
+  Downloading click-8.3.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting colorama (from openmim)
+  Obtaining dependency information for colorama from https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl.metadata
+  Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+Collecting model-index (from openmim)
+  Obtaining dependency information for model-index from https://files.pythonhosted.org/packages/0f/a6/4d4cbbef704f186d143e2859296a610a355992e4eae71582bd598093b36a/model_index-0.1.11-py3-none-any.whl.metadata
+  Downloading model_index-0.1.11-py3-none-any.whl.metadata (3.9 kB)
+Collecting opendatalab (from openmim)
+  Obtaining dependency information for opendatalab from https://files.pythonhosted.org/packages/10/82/28fa3a91b7c4852fbad9ad32c7b49e4b1e212ab7ccf7296736da0935070d/opendatalab-0.0.10-py3-none-any.whl.metadata
+  Downloading opendatalab-0.0.10-py3-none-any.whl.metadata (6.4 kB)
+Collecting pandas (from openmim)
+  Obtaining dependency information for pandas from https://files.pythonhosted.org/packages/44/a0/97a6339859d4acb2536efb24feb6708e82f7d33b2ed7e036f2983fcced82/pandas-3.0.2-cp311-cp311-win_amd64.whl.metadata
+  Downloading pandas-3.0.2-cp311-cp311-win_amd64.whl.metadata (19 kB)
+Collecting requests (from openmim)
+  Obtaining dependency information for requests from https://files.pythonhosted.org/packages/d7/8e/7540e8a2036f79a125c1d2ebadf69ed7901608859186c856fa0388ef4197/requests-2.33.1-py3-none-any.whl.metadata
+  Downloading requests-2.33.1-py3-none-any.whl.metadata (4.8 kB)
+Collecting rich (from openmim)
+  Obtaining dependency information for rich from https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl.metadata
+  Downloading rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+Collecting tabulate (from openmim)
+  Obtaining dependency information for tabulate from https://files.pythonhosted.org/packages/99/55/db07de81b5c630da5cbf5c7df646580ca26dfaefa593667fc6f2fe016d2e/tabulate-0.10.0-py3-none-any.whl.metadata
+  Downloading tabulate-0.10.0-py3-none-any.whl.metadata (40 kB)
+     ---------------------------------------- 40.8/40.8 kB 1.9 MB/s eta 0:00:00
+Collecting pyyaml (from model-index->openmim)
+  Obtaining dependency information for pyyaml from https://files.pythonhosted.org/packages/da/e3/ea007450a105ae919a72393cb06f122f288ef60bba2dc64b26e2646fa315/pyyaml-6.0.3-cp311-cp311-win_amd64.whl.metadata
+  Downloading pyyaml-6.0.3-cp311-cp311-win_amd64.whl.metadata (2.4 kB)
+Collecting markdown (from model-index->openmim)
+  Obtaining dependency information for markdown from https://files.pythonhosted.org/packages/de/1f/77fa3081e4f66ca3576c896ae5d31c3002ac6607f9747d2e3aa49227e464/markdown-3.10.2-py3-none-any.whl.metadata
+  Downloading markdown-3.10.2-py3-none-any.whl.metadata (5.1 kB)
+Collecting ordered-set (from model-index->openmim)
+  Obtaining dependency information for ordered-set from https://files.pythonhosted.org/packages/33/55/af02708f230eb77084a299d7b08175cff006dea4f2721074b92cdb0296c0/ordered_set-4.1.0-py3-none-any.whl.metadata
+  Downloading ordered_set-4.1.0-py3-none-any.whl.metadata (5.3 kB)
+Collecting pycryptodome (from opendatalab->openmim)
+  Obtaining dependency information for pycryptodome from https://files.pythonhosted.org/packages/54/2f/e97a1b8294db0daaa87012c24a7bb714147c7ade7656973fd6c736b484ff/pycryptodome-3.23.0-cp37-abi3-win_amd64.whl.metadata
+  Downloading pycryptodome-3.23.0-cp37-abi3-win_amd64.whl.metadata (3.5 kB)
+Collecting tqdm (from opendatalab->openmim)
+  Obtaining dependency information for tqdm from https://files.pythonhosted.org/packages/16/e1/3079a9ff9b8e11b846c6ac5c8b5bfb7ff225eee721825310c91b3b50304f/tqdm-4.67.3-py3-none-any.whl.metadata
+  Downloading tqdm-4.67.3-py3-none-any.whl.metadata (57 kB)
+     ---------------------------------------- 57.7/57.7 kB 3.2 MB/s eta 0:00:00
+Collecting openxlab (from opendatalab->openmim)
+  Obtaining dependency information for openxlab from https://files.pythonhosted.org/packages/b4/96/9328ab5187064f82af8843d8ee6be9bce9a1af0e5b9129d098555cf584f9/openxlab-0.1.3-py3-none-any.whl.metadata
+  Downloading openxlab-0.1.3-py3-none-any.whl.metadata (3.8 kB)
+Collecting pywin32 (from opendatalab->openmim)
+  Obtaining dependency information for pywin32 from https://files.pythonhosted.org/packages/51/8f/9bb81dd5bb77d22243d33c8397f09377056d5c687aa6d4042bea7fbf8364/pywin32-311-cp311-cp311-win_amd64.whl.metadata
+  Downloading pywin32-311-cp311-cp311-win_amd64.whl.metadata (10 kB)
+Collecting charset_normalizer<4,>=2 (from requests->openmim)
+  Obtaining dependency information for charset_normalizer<4,>=2 from https://files.pythonhosted.org/packages/20/d9/5f67790f06b735d7c7637171bbfd89882ad67201891b7275e51116ed8207/charset_normalizer-3.4.7-cp311-cp311-win_amd64.whl.metadata
+  Downloading charset_normalizer-3.4.7-cp311-cp311-win_amd64.whl.metadata (41 kB)
+     ---------------------------------------- 41.7/41.7 kB ? eta 0:00:00
+Collecting idna<4,>=2.5 (from requests->openmim)
+  Obtaining dependency information for idna<4,>=2.5 from https://files.pythonhosted.org/packages/0e/61/66938bbb5fc52dbdf84594873d5b51fb1f7c7794e9c0f5bd885f30bc507b/idna-3.11-py3-none-any.whl.metadata
+  Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+Collecting urllib3<3,>=1.26 (from requests->openmim)
+  Obtaining dependency information for urllib3<3,>=1.26 from https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl.metadata
+  Downloading urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+Collecting certifi>=2023.5.7 (from requests->openmim)
+  Obtaining dependency information for certifi>=2023.5.7 from https://files.pythonhosted.org/packages/9a/3c/c17fb3ca2d9c3acff52e30b309f538586f9f5b9c9cf454f3845fc9af4881/certifi-2026.2.25-py3-none-any.whl.metadata
+  Downloading certifi-2026.2.25-py3-none-any.whl.metadata (2.5 kB)
+Collecting numpy>=1.26.0 (from pandas->openmim)
+  Obtaining dependency information for numpy>=1.26.0 from https://files.pythonhosted.org/packages/bd/63/05d193dbb4b5eec1eca73822d80da98b511f8328ad4ae3ca4caf0f4db91d/numpy-2.4.4-cp311-cp311-win_amd64.whl.metadata
+  Downloading numpy-2.4.4-cp311-cp311-win_amd64.whl.metadata (6.6 kB)
+Collecting python-dateutil>=2.8.2 (from pandas->openmim)
+  Obtaining dependency information for python-dateutil>=2.8.2 from https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata
+  Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting tzdata (from pandas->openmim)
+  Obtaining dependency information for tzdata from https://files.pythonhosted.org/packages/b0/70/d460bd685a170790ec89317e9bd33047988e4bce507b831f5db771e142de/tzdata-2026.1-py2.py3-none-any.whl.metadata
+  Downloading tzdata-2026.1-py2.py3-none-any.whl.metadata (1.4 kB)
+Collecting markdown-it-py>=2.2.0 (from rich->openmim)
+  Obtaining dependency information for markdown-it-py>=2.2.0 from https://files.pythonhosted.org/packages/94/54/e7d793b573f298e1c9013b8c4dade17d481164aa517d1d7148619c2cedbf/markdown_it_py-4.0.0-py3-none-any.whl.metadata
+  Downloading markdown_it_py-4.0.0-py3-none-any.whl.metadata (7.3 kB)
+Collecting pygments<3.0.0,>=2.13.0 (from rich->openmim)
+  Obtaining dependency information for pygments<3.0.0,>=2.13.0 from https://files.pythonhosted.org/packages/f4/7e/a72dd26f3b0f4f2bf1dd8923c85f7ceb43172af56d63c7383eb62b332364/pygments-2.20.0-py3-none-any.whl.metadata
+  Downloading pygments-2.20.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich->openmim)
+  Obtaining dependency information for mdurl~=0.1 from https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl.metadata
+  Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas->openmim)
+  Obtaining dependency information for six>=1.5 from https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl.metadata
+  Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting filelock~=3.14.0 (from openxlab->opendatalab->openmim)
+  Obtaining dependency information for filelock~=3.14.0 from https://files.pythonhosted.org/packages/41/24/0b023b6537dfc9bae2c779353998e3e99ac7dfff4222fc6126650e93c3f3/filelock-3.14.0-py3-none-any.whl.metadata
+  Downloading filelock-3.14.0-py3-none-any.whl.metadata (2.8 kB)
+Collecting oss2~=2.17.0 (from openxlab->opendatalab->openmim)
+  Downloading oss2-2.17.0.tar.gz (259 kB)
+     -------------------------------------- 259.5/259.5 kB 2.0 MB/s eta 0:00:00
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting packaging
+  Obtaining dependency information for packaging from https://files.pythonhosted.org/packages/88/ef/eb23f262cca3c0c4eb7ab1933c3b1f03d021f2c48f54763065b6f0e321be/packaging-24.2-py3-none-any.whl.metadata
+  Downloading packaging-24.2-py3-none-any.whl.metadata (3.2 kB)
+Collecting pytz~=2023.3 (from openxlab->opendatalab->openmim)
+  Obtaining dependency information for pytz~=2023.3 from https://files.pythonhosted.org/packages/3b/dd/9b84302ba85ac6d3d3042d3e8698374838bde1c386b4adb1223d7a0efd4e/pytz-2023.4-py2.py3-none-any.whl.metadata
+  Downloading pytz-2023.4-py2.py3-none-any.whl.metadata (22 kB)
+Collecting requests (from openmim)
+  Obtaining dependency information for requests from https://files.pythonhosted.org/packages/d2/f4/274d1dbe96b41cf4e0efb70cbced278ffd61b5c7bb70338b62af94ccb25b/requests-2.28.2-py3-none-any.whl.metadata
+  Downloading requests-2.28.2-py3-none-any.whl.metadata (4.6 kB)
+Collecting rich (from openmim)
+  Obtaining dependency information for rich from https://files.pythonhosted.org/packages/fc/1e/482e5eec0b89b593e81d78f819a9412849814e22225842b598908e7ac560/rich-13.4.2-py3-none-any.whl.metadata
+  Downloading rich-13.4.2-py3-none-any.whl.metadata (18 kB)
+Collecting setuptools
+  Obtaining dependency information for setuptools from https://files.pythonhosted.org/packages/8e/16/8f64922c8d7cd7ec193b145c9b11ad281064ff8604452ba19a6d5bbd7ed9/setuptools-60.2.0-py3-none-any.whl.metadata
+  Downloading setuptools-60.2.0-py3-none-any.whl.metadata (5.1 kB)
+Collecting tqdm (from opendatalab->openmim)
+  Obtaining dependency information for tqdm from https://files.pythonhosted.org/packages/c0/ab/bd9ba7f84c509c8b377628bc66696d52623e30c6c0830db3c78748eec4b4/tqdm-4.65.2-py3-none-any.whl.metadata
+  Downloading tqdm-4.65.2-py3-none-any.whl.metadata (56 kB)
+     ---------------------------------------- 57.0/57.0 kB ? eta 0:00:00
+Collecting urllib3<1.27,>=1.21.1 (from requests->openmim)
+  Obtaining dependency information for urllib3<1.27,>=1.21.1 from https://files.pythonhosted.org/packages/33/cf/8435d5a7159e2a9c83a95896ed596f68cf798005fe107cc655b5c5c14704/urllib3-1.26.20-py2.py3-none-any.whl.metadata
+  Downloading urllib3-1.26.20-py2.py3-none-any.whl.metadata (50 kB)
+     ---------------------------------------- 50.1/50.1 kB 2.5 MB/s eta 0:00:00
+Collecting crcmod>=1.7 (from oss2~=2.17.0->openxlab->opendatalab->openmim)
+  Downloading crcmod-1.7.tar.gz (89 kB)
+     ---------------------------------------- 89.7/89.7 kB 5.3 MB/s eta 0:00:00
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting aliyun-python-sdk-kms>=2.4.1 (from oss2~=2.17.0->openxlab->opendatalab->openmim)
+  Obtaining dependency information for aliyun-python-sdk-kms>=2.4.1 from https://files.pythonhosted.org/packages/11/5c/0132193d7da2c735669a1ed103b142fd63c9455984d48c5a88a1a516efaa/aliyun_python_sdk_kms-2.16.5-py2.py3-none-any.whl.metadata
+  Downloading aliyun_python_sdk_kms-2.16.5-py2.py3-none-any.whl.metadata (1.5 kB)
+Collecting aliyun-python-sdk-core>=2.13.12 (from oss2~=2.17.0->openxlab->opendatalab->openmim)
+  Downloading aliyun-python-sdk-core-2.16.0.tar.gz (449 kB)
+     -------------------------------------- 449.6/449.6 kB 2.8 MB/s eta 0:00:00
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting jmespath<1.0.0,>=0.9.3 (from aliyun-python-sdk-core>=2.13.12->oss2~=2.17.0->openxlab->opendatalab->openmim)
+  Obtaining dependency information for jmespath<1.0.0,>=0.9.3 from https://files.pythonhosted.org/packages/07/cb/5f001272b6faeb23c1c9e0acc04d48eaaf5c862c17709d20e3469c6e0139/jmespath-0.10.0-py2.py3-none-any.whl.metadata
+  Downloading jmespath-0.10.0-py2.py3-none-any.whl.metadata (8.0 kB)
+Collecting cryptography>=3.0.0 (from aliyun-python-sdk-core>=2.13.12->oss2~=2.17.0->openxlab->opendatalab->openmim)
+  Obtaining dependency information for cryptography>=3.0.0 from https://files.pythonhosted.org/packages/2b/02/7788f9fefa1d060ca68717c3901ae7fffa21ee087a90b7f23c7a603c32ae/cryptography-46.0.7-cp311-abi3-win_amd64.whl.metadata
+  Downloading cryptography-46.0.7-cp311-abi3-win_amd64.whl.metadata (5.7 kB)
+Collecting cffi>=2.0.0 (from cryptography>=3.0.0->aliyun-python-sdk-core>=2.13.12->oss2~=2.17.0->openxlab->opendatalab->openmim)
+  Obtaining dependency information for cffi>=2.0.0 from https://files.pythonhosted.org/packages/ae/8f/dc5531155e7070361eb1b7e4c1a9d896d0cb21c49f807a6c03fd63fc877e/cffi-2.0.0-cp311-cp311-win_amd64.whl.metadata
+  Downloading cffi-2.0.0-cp311-cp311-win_amd64.whl.metadata (2.6 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=3.0.0->aliyun-python-sdk-core>=2.13.12->oss2~=2.17.0->openxlab->opendatalab->openmim)
+  Obtaining dependency information for pycparser from https://files.pythonhosted.org/packages/0c/c3/44f3fbbfa403ea2a7c779186dc20772604442dde72947e7d01069cbe98e3/pycparser-3.0-py3-none-any.whl.metadata
+  Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+Downloading pip-26.0.1-py3-none-any.whl (1.8 MB)
+   ---------------------------------------- 1.8/1.8 MB 3.4 MB/s eta 0:00:00
+Downloading wheel-0.46.3-py3-none-any.whl (30 kB)
+Downloading cython-3.2.4-cp311-cp311-win_amd64.whl (2.8 MB)
+   ---------------------------------------- 2.8/2.8 MB 2.8 MB/s eta 0:00:00
+Downloading ninja-1.13.0-py3-none-win_amd64.whl (309 kB)
+   ---------------------------------------- 310.0/310.0 kB 3.2 MB/s eta 0:00:00
+Downloading cmake-4.3.1-py3-none-win_amd64.whl (41.3 MB)
+   ---------------------------------------- 41.3/41.3 MB 4.4 MB/s eta 0:00:00
+Downloading openmim-0.3.9-py2.py3-none-any.whl (52 kB)
+   ---------------------------------------- 52.7/52.7 kB 1.4 MB/s eta 0:00:00
+Downloading click-8.3.2-py3-none-any.whl (108 kB)
+   ---------------------------------------- 108.4/108.4 kB 1.3 MB/s eta 0:00:00
+Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+Downloading model_index-0.1.11-py3-none-any.whl (34 kB)
+Downloading opendatalab-0.0.10-py3-none-any.whl (29 kB)
+Downloading pandas-3.0.2-cp311-cp311-win_amd64.whl (9.9 MB)
+   ---------------------------------------- 9.9/9.9 MB 4.2 MB/s eta 0:00:00
+Downloading tabulate-0.10.0-py3-none-any.whl (39 kB)
+Downloading certifi-2026.2.25-py3-none-any.whl (153 kB)
+   ---------------------------------------- 153.7/153.7 kB 3.1 MB/s eta 0:00:00
+Downloading charset_normalizer-3.4.7-cp311-cp311-win_amd64.whl (159 kB)
+   ---------------------------------------- 159.3/159.3 kB 3.2 MB/s eta 0:00:00
+Downloading idna-3.11-py3-none-any.whl (71 kB)
+   ---------------------------------------- 71.0/71.0 kB ? eta 0:00:00
+Downloading markdown_it_py-4.0.0-py3-none-any.whl (87 kB)
+   ---------------------------------------- 87.3/87.3 kB 4.8 MB/s eta 0:00:00
+Downloading numpy-2.4.4-cp311-cp311-win_amd64.whl (12.6 MB)
+   ---------------------------------------- 12.6/12.6 MB 5.4 MB/s eta 0:00:00
+Downloading pygments-2.20.0-py3-none-any.whl (1.2 MB)
+   ---------------------------------------- 1.2/1.2 MB 6.0 MB/s eta 0:00:00
+Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+   ---------------------------------------- 229.9/229.9 kB 7.1 MB/s eta 0:00:00
+Downloading markdown-3.10.2-py3-none-any.whl (108 kB)
+   ---------------------------------------- 108.2/108.2 kB 1.0 MB/s eta 0:00:00
+Downloading openxlab-0.1.3-py3-none-any.whl (314 kB)
+   ---------------------------------------- 314.5/314.5 kB 9.8 MB/s eta 0:00:00
+Downloading setuptools-60.2.0-py3-none-any.whl (953 kB)
+   ---------------------------------------- 953.1/953.1 kB 4.3 MB/s eta 0:00:00
+Downloading packaging-24.2-py3-none-any.whl (65 kB)
+   ---------------------------------------- 65.5/65.5 kB ? eta 0:00:00
+Downloading requests-2.28.2-py3-none-any.whl (62 kB)
+   ---------------------------------------- 62.8/62.8 kB ? eta 0:00:00
+Downloading rich-13.4.2-py3-none-any.whl (239 kB)
+   ---------------------------------------- 239.4/239.4 kB 4.9 MB/s eta 0:00:00
+Downloading pyyaml-6.0.3-cp311-cp311-win_amd64.whl (158 kB)
+   ---------------------------------------- 158.8/158.8 kB 4.6 MB/s eta 0:00:00
+Downloading tqdm-4.65.2-py3-none-any.whl (77 kB)
+   ---------------------------------------- 77.1/77.1 kB 4.2 MB/s eta 0:00:00
+Downloading urllib3-1.26.20-py2.py3-none-any.whl (144 kB)
+   ---------------------------------------- 144.2/144.2 kB 4.3 MB/s eta 0:00:00
+Downloading ordered_set-4.1.0-py3-none-any.whl (7.6 kB)
+Downloading pycryptodome-3.23.0-cp37-abi3-win_amd64.whl (1.8 MB)
+   ---------------------------------------- 1.8/1.8 MB 5.5 MB/s eta 0:00:00
+Downloading pywin32-311-cp311-cp311-win_amd64.whl (9.5 MB)
+   ---------------------------------------- 9.5/9.5 MB 5.1 MB/s eta 0:00:00
+Downloading tzdata-2026.1-py2.py3-none-any.whl (348 kB)
+   ---------------------------------------- 349.0/349.0 kB 5.4 MB/s eta 0:00:00
+Downloading filelock-3.14.0-py3-none-any.whl (12 kB)
+Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+Downloading pytz-2023.4-py2.py3-none-any.whl (506 kB)
+   ---------------------------------------- 506.5/506.5 kB 6.4 MB/s eta 0:00:00
+Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+Downloading aliyun_python_sdk_kms-2.16.5-py2.py3-none-any.whl (99 kB)
+   ---------------------------------------- 99.5/99.5 kB 5.6 MB/s eta 0:00:00
+Downloading cryptography-46.0.7-cp311-abi3-win_amd64.whl (3.5 MB)
+   ---------------------------------------- 3.5/3.5 MB 4.7 MB/s eta 0:00:00
+Downloading jmespath-0.10.0-py2.py3-none-any.whl (24 kB)
+Downloading cffi-2.0.0-cp311-cp311-win_amd64.whl (182 kB)
+   ---------------------------------------- 182.8/182.8 kB 5.6 MB/s eta 0:00:00
+Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+   ---------------------------------------- 48.2/48.2 kB ? eta 0:00:00
+Building wheels for collected packages: oss2, aliyun-python-sdk-core, crcmod
+  Building wheel for oss2 (pyproject.toml): started
+  Building wheel for oss2 (pyproject.toml): finished with status 'done'
+  Created wheel for oss2: filename=oss2-2.17.0-py3-none-any.whl size=112484 sha256=1e216794d661df074dacfcb2974661da00ef558ff7ff359fcfca13ef3a74e0e1
+  Stored in directory: C:\Users\pwt\AppData\Local\Temp\pip-ephem-wheel-cache-fx2e6ofs\wheels\42\79\aa\3671e313c27de35211d345d7a9d8ccb7dde515cf05edba75df
+  Building wheel for aliyun-python-sdk-core (pyproject.toml): started
+  Building wheel for aliyun-python-sdk-core (pyproject.toml): finished with status 'done'
+  Created wheel for aliyun-python-sdk-core: filename=aliyun_python_sdk_core-2.16.0-py3-none-any.whl size=535435 sha256=8a99e65df8fd8f92457bd38471472c08afc0bacec04d98cb5c0575c7da327673
+  Stored in directory: C:\Users\pwt\AppData\Local\Temp\pip-ephem-wheel-cache-fx2e6ofs\wheels\2b\9a\95\60f111d2a488c5f7f7ed2a96ce407ea57ec7393ddfdec8c956
+  Building wheel for crcmod (pyproject.toml): started
+  Building wheel for crcmod (pyproject.toml): finished with status 'done'
+  Created wheel for crcmod: filename=crcmod-1.7-py3-none-any.whl size=18949 sha256=fd5b98a933a90b3af5976a0f8ddfb88262f91bba94620069d2ebb6d541c866af
+  Stored in directory: C:\Users\pwt\AppData\Local\Temp\pip-ephem-wheel-cache-fx2e6ofs\wheels\23\94\7a\8cb7d14597e6395ce969933f01aed9ea8fa5f5b4d4c8a61e99
+Successfully built oss2 aliyun-python-sdk-core crcmod
+Installing collected packages: pywin32, pytz, crcmod, urllib3, tzdata, tabulate, six, setuptools, pyyaml, pygments, pycryptodome, pycparser, pip, packaging, ordered-set, numpy, ninja, mdurl, markdown, jmespath, idna, filelock, cython, colorama, cmake, charset_normalizer, certifi, wheel, tqdm, requests, python-dateutil, markdown-it-py, Click, cffi, rich, pandas, model-index, cryptography, aliyun-python-sdk-core, aliyun-python-sdk-kms, oss2, openxlab, opendatalab, openmim
+  Attempting uninstall: setuptools
+    Found existing installation: setuptools 65.5.0
+    Uninstalling setuptools-65.5.0:
+      Successfully uninstalled setuptools-65.5.0
+  Attempting uninstall: pip
+    Found existing installation: pip 23.2.1
+    Uninstalling pip-23.2.1:
+      Successfully uninstalled pip-23.2.1
+Successfully installed Click-8.3.2 aliyun-python-sdk-core-2.16.0 aliyun-python-sdk-kms-2.16.5 certifi-2026.2.25 cffi-2.0.0 charset_normalizer-3.4.7 cmake-4.3.1 colorama-0.4.6 crcmod-1.7 cryptography-46.0.7 cython-3.2.4 filelock-3.14.0 idna-3.11 jmespath-0.10.0 markdown-3.10.2 markdown-it-py-4.0.0 mdurl-0.1.2 model-index-0.1.11 ninja-1.13.0 numpy-2.4.4 opendatalab-0.0.10 openmim-0.3.9 openxlab-0.1.3 ordered-set-4.1.0 oss2-2.17.0 packaging-24.2 pandas-3.0.2 pip-26.0.1 pycparser-3.0 pycryptodome-3.23.0 pygments-2.20.0 python-dateutil-2.9.0.post0 pytz-2023.4 pywin32-311 pyyaml-6.0.3 requests-2.28.2 rich-13.4.2 setuptools-60.2.0 six-1.17.0 tabulate-0.10.0 tqdm-4.65.2 tzdata-2026.1 urllib3-1.26.20 wheel-0.46.3
+
+===== 03_science_stack.log =====
+Looking in indexes: https://pypi.org/simple, https://pypi.ngc.nvidia.com
+Collecting numpy==1.26.4
+  Downloading numpy-1.26.4-cp311-cp311-win_amd64.whl.metadata (61 kB)
+Collecting scipy==1.11.4
+  Downloading scipy-1.11.4-cp311-cp311-win_amd64.whl.metadata (60 kB)
+Collecting pandas==2.2.3
+  Downloading pandas-2.2.3-cp311-cp311-win_amd64.whl.metadata (19 kB)
+Collecting scikit-learn==1.5.2
+  Downloading scikit_learn-1.5.2-cp311-cp311-win_amd64.whl.metadata (13 kB)
+Collecting matplotlib==3.8.4
+  Downloading matplotlib-3.8.4-cp311-cp311-win_amd64.whl.metadata (5.9 kB)
+Collecting tqdm==4.67.1
+  Downloading tqdm-4.67.1-py3-none-any.whl.metadata (57 kB)
+Collecting pyyaml==6.0.2
+  Downloading PyYAML-6.0.2-cp311-cp311-win_amd64.whl.metadata (2.1 kB)
+Collecting numba==0.60.0
+  Downloading numba-0.60.0-cp311-cp311-win_amd64.whl.metadata (2.8 kB)
+Collecting pillow==10.4.0
+  Downloading pillow-10.4.0-cp311-cp311-win_amd64.whl.metadata (9.3 kB)
+Collecting opencv-python==4.10.0.84
+  Downloading opencv_python-4.10.0.84-cp37-abi3-win_amd64.whl.metadata (20 kB)
+Collecting easydict==1.13
+  Downloading easydict-1.13-py3-none-any.whl.metadata (4.2 kB)
+Collecting scikit-image==0.22.0
+  Downloading scikit_image-0.22.0-cp311-cp311-win_amd64.whl.metadata (13 kB)
+Requirement already satisfied: python-dateutil>=2.8.2 in D:\codex_envs\3ddet_env\Lib\site-packages (from pandas==2.2.3) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from pandas==2.2.3) (2023.4)
+Requirement already satisfied: tzdata>=2022.7 in D:\codex_envs\3ddet_env\Lib\site-packages (from pandas==2.2.3) (2026.1)
+Collecting joblib>=1.2.0 (from scikit-learn==1.5.2)
+  Downloading joblib-1.5.3-py3-none-any.whl.metadata (5.5 kB)
+Collecting threadpoolctl>=3.1.0 (from scikit-learn==1.5.2)
+  Downloading threadpoolctl-3.6.0-py3-none-any.whl.metadata (13 kB)
+Collecting contourpy>=1.0.1 (from matplotlib==3.8.4)
+  Downloading contourpy-1.3.3-cp311-cp311-win_amd64.whl.metadata (5.5 kB)
+Collecting cycler>=0.10 (from matplotlib==3.8.4)
+  Downloading cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+Collecting fonttools>=4.22.0 (from matplotlib==3.8.4)
+  Downloading fonttools-4.62.1-cp311-cp311-win_amd64.whl.metadata (119 kB)
+Collecting kiwisolver>=1.3.1 (from matplotlib==3.8.4)
+  Downloading kiwisolver-1.5.0-cp311-cp311-win_amd64.whl.metadata (5.2 kB)
+Requirement already satisfied: packaging>=20.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib==3.8.4) (24.2)
+Collecting pyparsing>=2.3.1 (from matplotlib==3.8.4)
+  Downloading pyparsing-3.3.2-py3-none-any.whl.metadata (5.8 kB)
+Requirement already satisfied: colorama in D:\codex_envs\3ddet_env\Lib\site-packages (from tqdm==4.67.1) (0.4.6)
+Collecting llvmlite<0.44,>=0.43.0dev0 (from numba==0.60.0)
+  Downloading llvmlite-0.43.0-cp311-cp311-win_amd64.whl.metadata (4.9 kB)
+Collecting networkx>=2.8 (from scikit-image==0.22.0)
+  Downloading networkx-3.6.1-py3-none-any.whl.metadata (6.8 kB)
+Collecting imageio>=2.27 (from scikit-image==0.22.0)
+  Downloading imageio-2.37.3-py3-none-any.whl.metadata (9.7 kB)
+Collecting tifffile>=2022.8.12 (from scikit-image==0.22.0)
+  Downloading tifffile-2026.3.3-py3-none-any.whl.metadata (31 kB)
+Collecting lazy_loader>=0.3 (from scikit-image==0.22.0)
+  Downloading lazy_loader-0.5-py3-none-any.whl.metadata (5.9 kB)
+Requirement already satisfied: six>=1.5 in D:\codex_envs\3ddet_env\Lib\site-packages (from python-dateutil>=2.8.2->pandas==2.2.3) (1.17.0)
+Downloading numpy-1.26.4-cp311-cp311-win_amd64.whl (15.8 MB)
+   ---------------------------------------- 15.8/15.8 MB 3.1 MB/s  0:00:05
+Downloading scipy-1.11.4-cp311-cp311-win_amd64.whl (44.1 MB)
+   ---------------------------------------- 44.1/44.1 MB 4.3 MB/s  0:00:10
+Downloading pandas-2.2.3-cp311-cp311-win_amd64.whl (11.6 MB)
+   ---------------------------------------- 11.6/11.6 MB 4.3 MB/s  0:00:02
+Downloading scikit_learn-1.5.2-cp311-cp311-win_amd64.whl (11.0 MB)
+   ---------------------------------------- 11.0/11.0 MB 5.2 MB/s  0:00:02
+Downloading matplotlib-3.8.4-cp311-cp311-win_amd64.whl (7.7 MB)
+   ---------------------------------------- 7.7/7.7 MB 4.8 MB/s  0:00:01
+Downloading tqdm-4.67.1-py3-none-any.whl (78 kB)
+Downloading PyYAML-6.0.2-cp311-cp311-win_amd64.whl (161 kB)
+Downloading numba-0.60.0-cp311-cp311-win_amd64.whl (2.7 MB)
+   ---------------------------------------- 2.7/2.7 MB 5.4 MB/s  0:00:00
+Downloading pillow-10.4.0-cp311-cp311-win_amd64.whl (2.6 MB)
+   ---------------------------------------- 2.6/2.6 MB 5.2 MB/s  0:00:00
+Downloading opencv_python-4.10.0.84-cp37-abi3-win_amd64.whl (38.8 MB)
+   ---------------------------------------- 38.8/38.8 MB 3.7 MB/s  0:00:10
+Downloading easydict-1.13-py3-none-any.whl (6.8 kB)
+Downloading scikit_image-0.22.0-cp311-cp311-win_amd64.whl (24.5 MB)
+   ---------------------------------------- 24.5/24.5 MB 3.7 MB/s  0:00:06
+Downloading llvmlite-0.43.0-cp311-cp311-win_amd64.whl (28.1 MB)
+   ---------------------------------------- 28.1/28.1 MB 4.5 MB/s  0:00:06
+Downloading contourpy-1.3.3-cp311-cp311-win_amd64.whl (225 kB)
+Downloading cycler-0.12.1-py3-none-any.whl (8.3 kB)
+Downloading fonttools-4.62.1-cp311-cp311-win_amd64.whl (2.3 MB)
+   ---------------------------------------- 2.3/2.3 MB 3.9 MB/s  0:00:00
+Downloading imageio-2.37.3-py3-none-any.whl (317 kB)
+Downloading joblib-1.5.3-py3-none-any.whl (309 kB)
+Downloading kiwisolver-1.5.0-cp311-cp311-win_amd64.whl (73 kB)
+Downloading lazy_loader-0.5-py3-none-any.whl (8.0 kB)
+Downloading networkx-3.6.1-py3-none-any.whl (2.1 MB)
+   ---------------------------------------- 2.1/2.1 MB 4.3 MB/s  0:00:00
+Downloading pyparsing-3.3.2-py3-none-any.whl (122 kB)
+Downloading threadpoolctl-3.6.0-py3-none-any.whl (18 kB)
+Downloading tifffile-2026.3.3-py3-none-any.whl (243 kB)
+Installing collected packages: easydict, tqdm, threadpoolctl, pyyaml, pyparsing, pillow, numpy, networkx, llvmlite, lazy_loader, kiwisolver, joblib, fonttools, cycler, tifffile, scipy, pandas, opencv-python, numba, imageio, contourpy, scikit-learn, scikit-image, matplotlib
+  Attempting uninstall: tqdm
+    Found existing installation: tqdm 4.65.2
+    Uninstalling tqdm-4.65.2:
+      Successfully uninstalled tqdm-4.65.2
+  Attempting uninstall: pyyaml
+    Found existing installation: PyYAML 6.0.3
+    Uninstalling PyYAML-6.0.3:
+      Successfully uninstalled PyYAML-6.0.3
+  Attempting uninstall: numpy
+    Found existing installation: numpy 2.4.4
+    Uninstalling numpy-2.4.4:
+      Successfully uninstalled numpy-2.4.4
+  Attempting uninstall: pandas
+    Found existing installation: pandas 3.0.2
+    Uninstalling pandas-3.0.2:
+      Successfully uninstalled pandas-3.0.2
+
+python.exe : ERROR: pip's dependency resolver does not currently take into account all the packages that are installed.
+ This behaviour is the source of the following dependency conflicts.
+At line:2 char:78
++ ... ng]::new(); & D:\codex_envs\3ddet_env\Scripts\python.exe -m pip insta ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: pip's de...ency conflicts.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+openxlab 0.1.3 requires tqdm~=4.65.0, but you have tqdm 4.67.1 which is incompatible.
+Successfully installed contourpy-1.3.3 cycler-0.12.1 easydict-1.13 fonttools-4.62.1 imageio-2.37.3 joblib-1.5.3 kiwisolver-1.5.0 lazy_loader-0.5 llvmlite-0.43.0 matplotlib-3.8.4 networkx-3.6.1 numba-0.60.0 numpy-1.26.4 opencv-python-4.10.0.84 pandas-2.2.3 pillow-10.4.0 pyparsing-3.3.2 pyyaml-6.0.2 scikit-image-0.22.0 scikit-learn-1.5.2 scipy-1.11.4 threadpoolctl-3.6.0 tifffile-2026.3.3 tqdm-4.67.1
+
+===== 04_torch_gpu.log =====
+Looking in indexes: https://download.pytorch.org/whl/cu121, https://pypi.ngc.nvidia.com
+Collecting torch==2.1.2
+  Downloading https://download-r2.pytorch.org/whl/cu121/torch-2.1.2%2Bcu121-cp311-cp311-win_amd64.whl (2474.0 MB)
+     ---------------------------------------- 2.5/2.5 GB 3.3 MB/s  0:10:22
+Collecting torchvision==0.16.2
+  Downloading https://download-r2.pytorch.org/whl/cu121/torchvision-0.16.2%2Bcu121-cp311-cp311-win_amd64.whl (5.6 MB)
+     ---------------------------------------- 5.6/5.6 MB 3.7 MB/s  0:00:01
+Collecting torchaudio==2.1.2
+  Downloading https://download-r2.pytorch.org/whl/cu121/torchaudio-2.1.2%2Bcu121-cp311-cp311-win_amd64.whl (4.0 MB)
+     ---------------------------------------- 4.0/4.0 MB 4.0 MB/s  0:00:00
+Requirement already satisfied: filelock in D:\codex_envs\3ddet_env\Lib\site-packages (from torch==2.1.2) (3.14.0)
+Collecting typing-extensions (from torch==2.1.2)
+  Downloading https://download.pytorch.org/whl/typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting sympy (from torch==2.1.2)
+  Downloading sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+Requirement already satisfied: networkx in D:\codex_envs\3ddet_env\Lib\site-packages (from torch==2.1.2) (3.6.1)
+Collecting jinja2 (from torch==2.1.2)
+  Downloading https://download.pytorch.org/whl/jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting fsspec (from torch==2.1.2)
+  Downloading fsspec-2026.2.0-py3-none-any.whl.metadata (10 kB)
+Requirement already satisfied: numpy in D:\codex_envs\3ddet_env\Lib\site-packages (from torchvision==0.16.2) (1.26.4)
+Requirement already satisfied: requests in D:\codex_envs\3ddet_env\Lib\site-packages (from torchvision==0.16.2) (2.28.2)
+Requirement already satisfied: pillow!=8.3.*,>=5.3.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from torchvision==0.16.2) (10.4.0)
+Collecting MarkupSafe>=2.0 (from jinja2->torch==2.1.2)
+  Downloading https://download.pytorch.org/whl/markupsafe-3.0.3-cp311-cp311-win_amd64.whl.metadata (2.8 kB)
+Requirement already satisfied: charset-normalizer<4,>=2 in D:\codex_envs\3ddet_env\Lib\site-packages (from requests->torchvision==0.16.2) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in D:\codex_envs\3ddet_env\Lib\site-packages (from requests->torchvision==0.16.2) (3.11)
+Requirement already satisfied: urllib3<1.27,>=1.21.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from requests->torchvision==0.16.2) (1.26.20)
+Requirement already satisfied: certifi>=2017.4.17 in D:\codex_envs\3ddet_env\Lib\site-packages (from requests->torchvision==0.16.2) (2026.2.25)
+Collecting mpmath<1.4,>=1.1.0 (from sympy->torch==2.1.2)
+  Downloading mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+Downloading fsspec-2026.2.0-py3-none-any.whl (202 kB)
+Downloading https://download.pytorch.org/whl/jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading https://download.pytorch.org/whl/markupsafe-3.0.3-cp311-cp311-win_amd64.whl (15 kB)
+Downloading sympy-1.14.0-py3-none-any.whl (6.3 MB)
+   ---------------------------------------- 6.3/6.3 MB 3.3 MB/s  0:00:01
+Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+   ---------------------------------------- 536.2/536.2 kB 2.2 MB/s  0:00:00
+Downloading https://download.pytorch.org/whl/typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Installing collected packages: mpmath, typing-extensions, sympy, MarkupSafe, fsspec, jinja2, torch, torchvision, torchaudio
+
+Successfully installed MarkupSafe-3.0.3 fsspec-2026.2.0 jinja2-3.1.6 mpmath-1.3.0 sympy-1.14.0 torch-2.1.2+cu121 torchaudio-2.1.2+cu121 torchvision-0.16.2+cu121 typing-extensions-4.15.0
+
+===== 05_mmengine_mmdet.log =====
+Looking in indexes: https://pypi.org/simple, https://pypi.ngc.nvidia.com
+Collecting mmengine==0.10.5
+  Downloading mmengine-0.10.5-py3-none-any.whl.metadata (20 kB)
+Collecting mmdet==3.3.0
+  Downloading mmdet-3.3.0-py3-none-any.whl.metadata (29 kB)
+Collecting addict (from mmengine==0.10.5)
+  Downloading addict-2.4.0-py3-none-any.whl.metadata (1.0 kB)
+Requirement already satisfied: matplotlib in D:\codex_envs\3ddet_env\Lib\site-packages (from mmengine==0.10.5) (3.8.4)
+Requirement already satisfied: numpy in D:\codex_envs\3ddet_env\Lib\site-packages (from mmengine==0.10.5) (1.26.4)
+Requirement already satisfied: pyyaml in D:\codex_envs\3ddet_env\Lib\site-packages (from mmengine==0.10.5) (6.0.2)
+Requirement already satisfied: rich in D:\codex_envs\3ddet_env\Lib\site-packages (from mmengine==0.10.5) (13.4.2)
+Collecting termcolor (from mmengine==0.10.5)
+  Downloading termcolor-3.3.0-py3-none-any.whl.metadata (6.5 kB)
+Collecting yapf (from mmengine==0.10.5)
+  Downloading yapf-0.43.0-py3-none-any.whl.metadata (46 kB)
+Requirement already satisfied: opencv-python>=3 in D:\codex_envs\3ddet_env\Lib\site-packages (from mmengine==0.10.5) (4.10.0.84)
+Collecting regex (from mmengine==0.10.5)
+  Downloading regex-2026.4.4-cp311-cp311-win_amd64.whl.metadata (41 kB)
+Collecting pycocotools (from mmdet==3.3.0)
+  Downloading pycocotools-2.0.11-cp311-cp311-win_amd64.whl.metadata (1.3 kB)
+Requirement already satisfied: scipy in D:\codex_envs\3ddet_env\Lib\site-packages (from mmdet==3.3.0) (1.11.4)
+Collecting shapely (from mmdet==3.3.0)
+  Downloading shapely-2.1.2-cp311-cp311-win_amd64.whl.metadata (7.1 kB)
+Requirement already satisfied: six in D:\codex_envs\3ddet_env\Lib\site-packages (from mmdet==3.3.0) (1.17.0)
+Collecting terminaltables (from mmdet==3.3.0)
+  Downloading terminaltables-3.1.10-py2.py3-none-any.whl.metadata (3.5 kB)
+Requirement already satisfied: tqdm in D:\codex_envs\3ddet_env\Lib\site-packages (from mmdet==3.3.0) (4.67.1)
+Requirement already satisfied: contourpy>=1.0.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine==0.10.5) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine==0.10.5) (0.12.1)
+Requirement already satisfied: fonttools>=4.22.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine==0.10.5) (4.62.1)
+Requirement already satisfied: kiwisolver>=1.3.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine==0.10.5) (1.5.0)
+Requirement already satisfied: packaging>=20.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine==0.10.5) (24.2)
+Requirement already satisfied: pillow>=8 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine==0.10.5) (10.4.0)
+Requirement already satisfied: pyparsing>=2.3.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine==0.10.5) (3.3.2)
+Requirement already satisfied: python-dateutil>=2.7 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine==0.10.5) (2.9.0.post0)
+Requirement already satisfied: markdown-it-py>=2.2.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from rich->mmengine==0.10.5) (4.0.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from rich->mmengine==0.10.5) (2.20.0)
+Requirement already satisfied: mdurl~=0.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from markdown-it-py>=2.2.0->rich->mmengine==0.10.5) (0.1.2)
+Requirement already satisfied: colorama in D:\codex_envs\3ddet_env\Lib\site-packages (from tqdm->mmdet==3.3.0) (0.4.6)
+Collecting platformdirs>=3.5.1 (from yapf->mmengine==0.10.5)
+  Downloading platformdirs-4.9.6-py3-none-any.whl.metadata (4.7 kB)
+Downloading mmengine-0.10.5-py3-none-any.whl (452 kB)
+Downloading mmdet-3.3.0-py3-none-any.whl (2.2 MB)
+   ---------------------------------------- 2.2/2.2 MB 4.1 MB/s  0:00:00
+Downloading addict-2.4.0-py3-none-any.whl (3.8 kB)
+Downloading pycocotools-2.0.11-cp311-cp311-win_amd64.whl (80 kB)
+Downloading regex-2026.4.4-cp311-cp311-win_amd64.whl (278 kB)
+Downloading shapely-2.1.2-cp311-cp311-win_amd64.whl (1.7 MB)
+   ---------------------------------------- 1.7/1.7 MB 4.2 MB/s  0:00:00
+Downloading termcolor-3.3.0-py3-none-any.whl (7.7 kB)
+Downloading terminaltables-3.1.10-py2.py3-none-any.whl (15 kB)
+Downloading yapf-0.43.0-py3-none-any.whl (256 kB)
+Downloading platformdirs-4.9.6-py3-none-any.whl (21 kB)
+Installing collected packages: addict, terminaltables, termcolor, shapely, regex, pycocotools, platformdirs, yapf, mmengine, mmdet
+
+Successfully installed addict-2.4.0 mmdet-3.3.0 mmengine-0.10.5 platformdirs-4.9.6 pycocotools-2.0.11 regex-2026.4.4 shapely-2.1.2 termcolor-3.3.0 terminaltables-3.1.10 yapf-0.43.0
+
+===== 06_mmcv.log =====
+Looking in indexes: https://pypi.org/simple, https://pypi.ngc.nvidia.com
+Looking in links: https://download.openmmlab.com/mmcv/dist/cu121/torch2.1.0/index.html
+Collecting mmcv==2.1.0
+  Downloading https://download.openmmlab.com/mmcv/dist/cu121/torch2.1.0/mmcv-2.1.0-cp311-cp311-win_amd64.whl (35.4 MB)
+     ---------------------------------------- 35.4/35.4 MB 474.2 kB/s  0:00:58
+Requirement already satisfied: addict in D:\codex_envs\3ddet_env\Lib\site-packages (from mmcv==2.1.0) (2.4.0)
+Requirement already satisfied: mmengine>=0.3.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from mmcv==2.1.0) (0.10.5)
+Requirement already satisfied: numpy in D:\codex_envs\3ddet_env\Lib\site-packages (from mmcv==2.1.0) (1.26.4)
+Requirement already satisfied: packaging in D:\codex_envs\3ddet_env\Lib\site-packages (from mmcv==2.1.0) (24.2)
+Requirement already satisfied: Pillow in D:\codex_envs\3ddet_env\Lib\site-packages (from mmcv==2.1.0) (10.4.0)
+Requirement already satisfied: pyyaml in D:\codex_envs\3ddet_env\Lib\site-packages (from mmcv==2.1.0) (6.0.2)
+Requirement already satisfied: yapf in D:\codex_envs\3ddet_env\Lib\site-packages (from mmcv==2.1.0) (0.43.0)
+Requirement already satisfied: opencv-python>=3 in D:\codex_envs\3ddet_env\Lib\site-packages (from mmcv==2.1.0) (4.10.0.84)
+Requirement already satisfied: regex in D:\codex_envs\3ddet_env\Lib\site-packages (from mmcv==2.1.0) (2026.4.4)
+Requirement already satisfied: matplotlib in D:\codex_envs\3ddet_env\Lib\site-packages (from mmengine>=0.3.0->mmcv==2.1.0) (3.8.4)
+Requirement already satisfied: rich in D:\codex_envs\3ddet_env\Lib\site-packages (from mmengine>=0.3.0->mmcv==2.1.0) (13.4.2)
+Requirement already satisfied: termcolor in D:\codex_envs\3ddet_env\Lib\site-packages (from mmengine>=0.3.0->mmcv==2.1.0) (3.3.0)
+Requirement already satisfied: contourpy>=1.0.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine>=0.3.0->mmcv==2.1.0) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine>=0.3.0->mmcv==2.1.0) (0.12.1)
+Requirement already satisfied: fonttools>=4.22.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine>=0.3.0->mmcv==2.1.0) (4.62.1)
+Requirement already satisfied: kiwisolver>=1.3.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine>=0.3.0->mmcv==2.1.0) (1.5.0)
+Requirement already satisfied: pyparsing>=2.3.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine>=0.3.0->mmcv==2.1.0) (3.3.2)
+Requirement already satisfied: python-dateutil>=2.7 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib->mmengine>=0.3.0->mmcv==2.1.0) (2.9.0.post0)
+Requirement already satisfied: six>=1.5 in D:\codex_envs\3ddet_env\Lib\site-packages (from python-dateutil>=2.7->matplotlib->mmengine>=0.3.0->mmcv==2.1.0) (1.17.0)
+Requirement already satisfied: markdown-it-py>=2.2.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from rich->mmengine>=0.3.0->mmcv==2.1.0) (4.0.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from rich->mmengine>=0.3.0->mmcv==2.1.0) (2.20.0)
+Requirement already satisfied: mdurl~=0.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from markdown-it-py>=2.2.0->rich->mmengine>=0.3.0->mmcv==2.1.0) (0.1.2)
+Requirement already satisfied: platformdirs>=3.5.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from yapf->mmcv==2.1.0) (4.9.6)
+Installing collected packages: mmcv
+Successfully installed mmcv-2.1.0
+
+===== 07_pointcloud_libs.log =====
+Looking in indexes: https://pypi.org/simple, https://pypi.ngc.nvidia.com
+Collecting open3d==0.19.0
+  Downloading open3d-0.19.0-cp311-cp311-win_amd64.whl.metadata (4.2 kB)
+Collecting plyfile==1.1.3
+  Downloading plyfile-1.1.3-py3-none-any.whl.metadata (43 kB)
+Collecting trimesh==4.8.3
+  Downloading trimesh-4.8.3-py3-none-any.whl.metadata (18 kB)
+Collecting pyquaternion==0.9.9
+  Downloading pyquaternion-0.9.9-py3-none-any.whl.metadata (1.4 kB)
+Collecting h5py==3.11.0
+  Downloading h5py-3.11.0-cp311-cp311-win_amd64.whl.metadata (2.5 kB)
+Collecting nuscenes-devkit==1.2.0
+  Downloading nuscenes_devkit-1.2.0-py3-none-any.whl.metadata (16 kB)
+Collecting lyft-dataset-sdk==0.0.8
+  Downloading lyft_dataset_sdk-0.0.8-py2.py3-none-any.whl.metadata (3.6 kB)
+Collecting tensorboard==2.18.0
+  Downloading tensorboard-2.18.0-py3-none-any.whl.metadata (1.6 kB)
+Requirement already satisfied: numpy>=1.18.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from open3d==0.19.0) (1.26.4)
+Collecting dash>=2.6.0 (from open3d==0.19.0)
+  Downloading dash-4.1.0-py3-none-any.whl.metadata (11 kB)
+Collecting werkzeug>=3.0.0 (from open3d==0.19.0)
+  Downloading werkzeug-3.1.8-py3-none-any.whl.metadata (4.0 kB)
+Collecting flask>=3.0.0 (from open3d==0.19.0)
+  Downloading flask-3.1.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting nbformat>=5.7.0 (from open3d==0.19.0)
+  Downloading nbformat-5.10.4-py3-none-any.whl.metadata (3.6 kB)
+Collecting configargparse (from open3d==0.19.0)
+  Downloading configargparse-1.7.5-py3-none-any.whl.metadata (23 kB)
+Collecting ipywidgets>=8.0.4 (from open3d==0.19.0)
+  Downloading ipywidgets-8.1.8-py3-none-any.whl.metadata (2.4 kB)
+Collecting cachetools (from nuscenes-devkit==1.2.0)
+  Downloading cachetools-7.0.5-py3-none-any.whl.metadata (5.6 kB)
+Collecting descartes (from nuscenes-devkit==1.2.0)
+  Downloading descartes-1.1.0-py3-none-any.whl.metadata (2.4 kB)
+Collecting fire (from nuscenes-devkit==1.2.0)
+  Downloading fire-0.7.1-py3-none-any.whl.metadata (5.8 kB)
+Requirement already satisfied: matplotlib>=3.6.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from nuscenes-devkit==1.2.0) (3.8.4)
+Collecting opencv-python-headless>=4.5.4.58 (from nuscenes-devkit==1.2.0)
+  Downloading opencv_python_headless-4.13.0.92-cp37-abi3-win_amd64.whl.metadata (20 kB)
+Requirement already satisfied: Pillow>6.2.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from nuscenes-devkit==1.2.0) (10.4.0)
+Requirement already satisfied: scikit-learn in D:\codex_envs\3ddet_env\Lib\site-packages (from nuscenes-devkit==1.2.0) (1.5.2)
+Requirement already satisfied: scipy in D:\codex_envs\3ddet_env\Lib\site-packages (from nuscenes-devkit==1.2.0) (1.11.4)
+Collecting Shapely~=2.0.3 (from nuscenes-devkit==1.2.0)
+  Downloading shapely-2.0.7-cp311-cp311-win_amd64.whl.metadata (7.1 kB)
+Requirement already satisfied: tqdm in D:\codex_envs\3ddet_env\Lib\site-packages (from nuscenes-devkit==1.2.0) (4.67.1)
+Collecting parameterized (from nuscenes-devkit==1.2.0)
+  Downloading parameterized-0.9.0-py2.py3-none-any.whl.metadata (18 kB)
+Requirement already satisfied: pycocotools>=2.0.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from nuscenes-devkit==1.2.0) (2.0.11)
+Collecting flake8 (from lyft-dataset-sdk==0.0.8)
+  Downloading flake8-7.3.0-py2.py3-none-any.whl.metadata (3.8 kB)
+Requirement already satisfied: opencv-python>=3.4.2.17 in D:\codex_envs\3ddet_env\Lib\site-packages (from lyft-dataset-sdk==0.0.8) (4.10.0.84)
+Collecting pytest (from lyft-dataset-sdk==0.0.8)
+  Downloading pytest-9.0.3-py3-none-any.whl.metadata (7.6 kB)
+Collecting black (from lyft-dataset-sdk==0.0.8)
+  Downloading black-26.3.1-cp311-cp311-win_amd64.whl.metadata (91 kB)
+Requirement already satisfied: pandas in D:\codex_envs\3ddet_env\Lib\site-packages (from lyft-dataset-sdk==0.0.8) (2.2.3)
+Collecting plotly (from lyft-dataset-sdk==0.0.8)
+  Downloading plotly-6.7.0-py3-none-any.whl.metadata (8.6 kB)
+Collecting absl-py>=0.4 (from tensorboard==2.18.0)
+  Downloading absl_py-2.4.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting grpcio>=1.48.2 (from tensorboard==2.18.0)
+  Downloading grpcio-1.80.0-cp311-cp311-win_amd64.whl.metadata (3.9 kB)
+Requirement already satisfied: markdown>=2.6.8 in D:\codex_envs\3ddet_env\Lib\site-packages (from tensorboard==2.18.0) (3.10.2)
+Requirement already satisfied: packaging in D:\codex_envs\3ddet_env\Lib\site-packages (from tensorboard==2.18.0) (24.2)
+Collecting protobuf!=4.24.0,>=3.19.6 (from tensorboard==2.18.0)
+  Downloading protobuf-7.34.1-cp310-abi3-win_amd64.whl.metadata (595 bytes)
+Requirement already satisfied: setuptools>=41.0.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from tensorboard==2.18.0) (60.2.0)
+Requirement already satisfied: six>1.9 in D:\codex_envs\3ddet_env\Lib\site-packages (from tensorboard==2.18.0) (1.17.0)
+Collecting tensorboard-data-server<0.8.0,>=0.7.0 (from tensorboard==2.18.0)
+  Downloading tensorboard_data_server-0.7.2-py3-none-any.whl.metadata (1.1 kB)
+Collecting importlib-metadata (from dash>=2.6.0->open3d==0.19.0)
+  Downloading importlib_metadata-9.0.0-py3-none-any.whl.metadata (4.5 kB)
+Requirement already satisfied: typing_extensions>=4.1.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from dash>=2.6.0->open3d==0.19.0) (4.15.0)
+Requirement already satisfied: requests in D:\codex_envs\3ddet_env\Lib\site-packages (from dash>=2.6.0->open3d==0.19.0) (2.28.2)
+Collecting retrying (from dash>=2.6.0->open3d==0.19.0)
+  Downloading retrying-1.4.2-py3-none-any.whl.metadata (5.5 kB)
+Collecting nest-asyncio (from dash>=2.6.0->open3d==0.19.0)
+  Downloading nest_asyncio-1.6.0-py3-none-any.whl.metadata (2.8 kB)
+Collecting blinker>=1.9.0 (from flask>=3.0.0->open3d==0.19.0)
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Requirement already satisfied: click>=8.1.3 in D:\codex_envs\3ddet_env\Lib\site-packages (from flask>=3.0.0->open3d==0.19.0) (8.3.2)
+Collecting itsdangerous>=2.2.0 (from flask>=3.0.0->open3d==0.19.0)
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Requirement already satisfied: jinja2>=3.1.2 in D:\codex_envs\3ddet_env\Lib\site-packages (from flask>=3.0.0->open3d==0.19.0) (3.1.6)
+Requirement already satisfied: markupsafe>=2.1.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from flask>=3.0.0->open3d==0.19.0) (3.0.3)
+Requirement already satisfied: colorama in D:\codex_envs\3ddet_env\Lib\site-packages (from click>=8.1.3->flask>=3.0.0->open3d==0.19.0) (0.4.6)
+Collecting comm>=0.1.3 (from ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading comm-0.2.3-py3-none-any.whl.metadata (3.7 kB)
+Collecting ipython>=6.1.0 (from ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading ipython-9.10.1-py3-none-any.whl.metadata (4.6 kB)
+Collecting traitlets>=4.3.1 (from ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading traitlets-5.14.3-py3-none-any.whl.metadata (10 kB)
+Collecting widgetsnbextension~=4.0.14 (from ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading widgetsnbextension-4.0.15-py3-none-any.whl.metadata (1.6 kB)
+Collecting jupyterlab_widgets~=3.0.15 (from ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading jupyterlab_widgets-3.0.16-py3-none-any.whl.metadata (20 kB)
+Collecting decorator>=4.3.2 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading decorator-5.2.1-py3-none-any.whl.metadata (3.9 kB)
+Collecting ipython-pygments-lexers>=1.0.0 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading ipython_pygments_lexers-1.1.1-py3-none-any.whl.metadata (1.1 kB)
+Collecting jedi>=0.18.1 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading jedi-0.19.2-py2.py3-none-any.whl.metadata (22 kB)
+Collecting matplotlib-inline>=0.1.5 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading matplotlib_inline-0.2.1-py3-none-any.whl.metadata (2.3 kB)
+Collecting prompt_toolkit<3.1.0,>=3.0.41 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading prompt_toolkit-3.0.52-py3-none-any.whl.metadata (6.4 kB)
+Requirement already satisfied: pygments>=2.11.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0) (2.20.0)
+Collecting stack_data>=0.6.0 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading stack_data-0.6.3-py3-none-any.whl.metadata (18 kB)
+Collecting wcwidth (from prompt_toolkit<3.1.0,>=3.0.41->ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading wcwidth-0.6.0-py3-none-any.whl.metadata (30 kB)
+Collecting parso<0.9.0,>=0.8.4 (from jedi>=0.18.1->ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading parso-0.8.6-py2.py3-none-any.whl.metadata (8.4 kB)
+Requirement already satisfied: contourpy>=1.0.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib>=3.6.0->nuscenes-devkit==1.2.0) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib>=3.6.0->nuscenes-devkit==1.2.0) (0.12.1)
+Requirement already satisfied: fonttools>=4.22.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib>=3.6.0->nuscenes-devkit==1.2.0) (4.62.1)
+Requirement already satisfied: kiwisolver>=1.3.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib>=3.6.0->nuscenes-devkit==1.2.0) (1.5.0)
+Requirement already satisfied: pyparsing>=2.3.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib>=3.6.0->nuscenes-devkit==1.2.0) (3.3.2)
+Requirement already satisfied: python-dateutil>=2.7 in D:\codex_envs\3ddet_env\Lib\site-packages (from matplotlib>=3.6.0->nuscenes-devkit==1.2.0) (2.9.0.post0)
+Collecting fastjsonschema>=2.15 (from nbformat>=5.7.0->open3d==0.19.0)
+  Downloading fastjsonschema-2.21.2-py3-none-any.whl.metadata (2.3 kB)
+Collecting jsonschema>=2.6 (from nbformat>=5.7.0->open3d==0.19.0)
+  Downloading jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+Collecting jupyter-core!=5.0.*,>=4.12 (from nbformat>=5.7.0->open3d==0.19.0)
+  Downloading jupyter_core-5.9.1-py3-none-any.whl.metadata (1.5 kB)
+Collecting attrs>=22.2.0 (from jsonschema>=2.6->nbformat>=5.7.0->open3d==0.19.0)
+  Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting jsonschema-specifications>=2023.03.6 (from jsonschema>=2.6->nbformat>=5.7.0->open3d==0.19.0)
+  Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+Collecting referencing>=0.28.4 (from jsonschema>=2.6->nbformat>=5.7.0->open3d==0.19.0)
+  Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+Collecting rpds-py>=0.25.0 (from jsonschema>=2.6->nbformat>=5.7.0->open3d==0.19.0)
+  Downloading rpds_py-0.30.0-cp311-cp311-win_amd64.whl.metadata (4.2 kB)
+Requirement already satisfied: platformdirs>=2.5 in D:\codex_envs\3ddet_env\Lib\site-packages (from jupyter-core!=5.0.*,>=4.12->nbformat>=5.7.0->open3d==0.19.0) (4.9.6)
+INFO: pip is looking at multiple versions of opencv-python-headless to determine which version is compatible with other requirements. This could take a while.
+Collecting opencv-python-headless>=4.5.4.58 (from nuscenes-devkit==1.2.0)
+  Downloading opencv_python_headless-4.13.0.90-cp37-abi3-win_amd64.whl.metadata (20 kB)
+  Downloading opencv_python_headless-4.12.0.88-cp37-abi3-win_amd64.whl.metadata (20 kB)
+  Downloading opencv_python_headless-4.11.0.86-cp37-abi3-win_amd64.whl.metadata (20 kB)
+Collecting narwhals>=1.15.1 (from plotly->lyft-dataset-sdk==0.0.8)
+  Downloading narwhals-2.19.0-py3-none-any.whl.metadata (14 kB)
+Requirement already satisfied: joblib>=1.2.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from scikit-learn->nuscenes-devkit==1.2.0) (1.5.3)
+Requirement already satisfied: threadpoolctl>=3.1.0 in D:\codex_envs\3ddet_env\Lib\site-packages (from scikit-learn->nuscenes-devkit==1.2.0) (3.6.0)
+Collecting executing>=1.2.0 (from stack_data>=0.6.0->ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading executing-2.2.1-py2.py3-none-any.whl.metadata (8.9 kB)
+Collecting asttokens>=2.1.0 (from stack_data>=0.6.0->ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading asttokens-3.0.1-py3-none-any.whl.metadata (4.9 kB)
+Collecting pure-eval (from stack_data>=0.6.0->ipython>=6.1.0->ipywidgets>=8.0.4->open3d==0.19.0)
+  Downloading pure_eval-0.2.3-py3-none-any.whl.metadata (6.3 kB)
+Collecting mypy-extensions>=0.4.3 (from black->lyft-dataset-sdk==0.0.8)
+  Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+Collecting pathspec>=1.0.0 (from black->lyft-dataset-sdk==0.0.8)
+  Downloading pathspec-1.0.4-py3-none-any.whl.metadata (13 kB)
+Collecting pytokens~=0.4.0 (from black->lyft-dataset-sdk==0.0.8)
+  Downloading pytokens-0.4.1-cp311-cp311-win_amd64.whl.metadata (3.9 kB)
+Requirement already satisfied: termcolor in D:\codex_envs\3ddet_env\Lib\site-packages (from fire->nuscenes-devkit==1.2.0) (3.3.0)
+Collecting mccabe<0.8.0,>=0.7.0 (from flake8->lyft-dataset-sdk==0.0.8)
+  Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8->lyft-dataset-sdk==0.0.8)
+  Downloading pycodestyle-2.14.0-py2.py3-none-any.whl.metadata (4.5 kB)
+Collecting pyflakes<3.5.0,>=3.4.0 (from flake8->lyft-dataset-sdk==0.0.8)
+  Downloading pyflakes-3.4.0-py2.py3-none-any.whl.metadata (3.5 kB)
+Collecting zipp>=3.20 (from importlib-metadata->dash>=2.6.0->open3d==0.19.0)
+  Downloading zipp-3.23.1-py3-none-any.whl.metadata (3.6 kB)
+Requirement already satisfied: pytz>=2020.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from pandas->lyft-dataset-sdk==0.0.8) (2023.4)
+Requirement already satisfied: tzdata>=2022.7 in D:\codex_envs\3ddet_env\Lib\site-packages (from pandas->lyft-dataset-sdk==0.0.8) (2026.1)
+Collecting iniconfig>=1.0.1 (from pytest->lyft-dataset-sdk==0.0.8)
+  Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting pluggy<2,>=1.5 (from pytest->lyft-dataset-sdk==0.0.8)
+  Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Requirement already satisfied: charset-normalizer<4,>=2 in D:\codex_envs\3ddet_env\Lib\site-packages (from requests->dash>=2.6.0->open3d==0.19.0) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in D:\codex_envs\3ddet_env\Lib\site-packages (from requests->dash>=2.6.0->open3d==0.19.0) (3.11)
+Requirement already satisfied: urllib3<1.27,>=1.21.1 in D:\codex_envs\3ddet_env\Lib\site-packages (from requests->dash>=2.6.0->open3d==0.19.0) (1.26.20)
+Requirement already satisfied: certifi>=2017.4.17 in D:\codex_envs\3ddet_env\Lib\site-packages (from requests->dash>=2.6.0->open3d==0.19.0) (2026.2.25)
+Downloading open3d-0.19.0-cp311-cp311-win_amd64.whl (69.2 MB)
+   ---------------------------------------- 69.2/69.2 MB 4.6 MB/s  0:00:15
+Downloading plyfile-1.1.3-py3-none-any.whl (36 kB)
+Downloading trimesh-4.8.3-py3-none-any.whl (735 kB)
+   ---------------------------------------- 735.5/735.5 kB 5.1 MB/s  0:00:00
+Downloading pyquaternion-0.9.9-py3-none-any.whl (14 kB)
+Downloading h5py-3.11.0-cp311-cp311-win_amd64.whl (3.0 MB)
+   ---------------------------------------- 3.0/3.0 MB 5.0 MB/s  0:00:00
+Downloading nuscenes_devkit-1.2.0-py3-none-any.whl (315 kB)
+Downloading lyft_dataset_sdk-0.0.8-py2.py3-none-any.whl (32 kB)
+Downloading tensorboard-2.18.0-py3-none-any.whl (5.5 MB)
+   ---------------------------------------- 5.5/5.5 MB 6.0 MB/s  0:00:00
+Downloading shapely-2.0.7-cp311-cp311-win_amd64.whl (1.4 MB)
+   ---------------------------------------- 1.4/1.4 MB 3.6 MB/s  0:00:00
+Downloading tensorboard_data_server-0.7.2-py3-none-any.whl (2.4 kB)
+Downloading absl_py-2.4.0-py3-none-any.whl (135 kB)
+Downloading cachetools-7.0.5-py3-none-any.whl (13 kB)
+Downloading dash-4.1.0-py3-none-any.whl (7.2 MB)
+   ---------------------------------------- 7.2/7.2 MB 4.9 MB/s  0:00:01
+Downloading flask-3.1.3-py3-none-any.whl (103 kB)
+Downloading werkzeug-3.1.8-py3-none-any.whl (226 kB)
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Downloading grpcio-1.80.0-cp311-cp311-win_amd64.whl (4.9 MB)
+   ---------------------------------------- 4.9/4.9 MB 3.2 MB/s  0:00:01
+Downloading ipywidgets-8.1.8-py3-none-any.whl (139 kB)
+Downloading jupyterlab_widgets-3.0.16-py3-none-any.whl (914 kB)
+   ---------------------------------------- 914.9/914.9 kB 3.5 MB/s  0:00:00
+Downloading widgetsnbextension-4.0.15-py3-none-any.whl (2.2 MB)
+   ---------------------------------------- 2.2/2.2 MB 5.6 MB/s  0:00:00
+Downloading comm-0.2.3-py3-none-any.whl (7.3 kB)
+Downloading ipython-9.10.1-py3-none-any.whl (622 kB)
+   ---------------------------------------- 622.8/622.8 kB 3.8 MB/s  0:00:00
+Downloading prompt_toolkit-3.0.52-py3-none-any.whl (391 kB)
+Downloading decorator-5.2.1-py3-none-any.whl (9.2 kB)
+Downloading ipython_pygments_lexers-1.1.1-py3-none-any.whl (8.1 kB)
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Downloading jedi-0.19.2-py2.py3-none-any.whl (1.6 MB)
+   ---------------------------------------- 1.6/1.6 MB 1.7 MB/s  0:00:00
+Downloading parso-0.8.6-py2.py3-none-any.whl (106 kB)
+Downloading matplotlib_inline-0.2.1-py3-none-any.whl (9.5 kB)
+Downloading nbformat-5.10.4-py3-none-any.whl (78 kB)
+Downloading fastjsonschema-2.21.2-py3-none-any.whl (24 kB)
+Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+Downloading jupyter_core-5.9.1-py3-none-any.whl (29 kB)
+Downloading opencv_python_headless-4.11.0.86-cp37-abi3-win_amd64.whl (39.4 MB)
+   ---------------------------------------- 39.4/39.4 MB 6.7 MB/s  0:00:06
+Downloading plotly-6.7.0-py3-none-any.whl (9.9 MB)
+   ---------------------------------------- 9.9/9.9 MB 15.0 MB/s  0:00:00
+Downloading narwhals-2.19.0-py3-none-any.whl (446 kB)
+Downloading protobuf-7.34.1-cp310-abi3-win_amd64.whl (437 kB)
+Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+Downloading rpds_py-0.30.0-cp311-cp311-win_amd64.whl (236 kB)
+Downloading stack_data-0.6.3-py3-none-any.whl (24 kB)
+Downloading asttokens-3.0.1-py3-none-any.whl (27 kB)
+Downloading executing-2.2.1-py2.py3-none-any.whl (28 kB)
+Downloading traitlets-5.14.3-py3-none-any.whl (85 kB)
+Downloading black-26.3.1-cp311-cp311-win_amd64.whl (1.4 MB)
+   ---------------------------------------- 1.4/1.4 MB 14.8 MB/s  0:00:00
+Downloading pytokens-0.4.1-cp311-cp311-win_amd64.whl (103 kB)
+Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+Downloading pathspec-1.0.4-py3-none-any.whl (55 kB)
+Downloading configargparse-1.7.5-py3-none-any.whl (27 kB)
+Downloading descartes-1.1.0-py3-none-any.whl (5.8 kB)
+Downloading fire-0.7.1-py3-none-any.whl (115 kB)
+Downloading flake8-7.3.0-py2.py3-none-any.whl (57 kB)
+Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+Downloading pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+Downloading pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+Downloading importlib_metadata-9.0.0-py3-none-any.whl (27 kB)
+Downloading zipp-3.23.1-py3-none-any.whl (10 kB)
+Downloading nest_asyncio-1.6.0-py3-none-any.whl (5.2 kB)
+Downloading parameterized-0.9.0-py2.py3-none-any.whl (20 kB)
+Downloading pure_eval-0.2.3-py3-none-any.whl (11 kB)
+Downloading pytest-9.0.3-py3-none-any.whl (375 kB)
+Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Downloading retrying-1.4.2-py3-none-any.whl (10 kB)
+Downloading wcwidth-0.6.0-py3-none-any.whl (94 kB)
+Installing collected packages: pure-eval, fastjsonschema, zipp, widgetsnbextension, werkzeug, wcwidth, trimesh, traitlets, tensorboard-data-server, Shapely, rpds-py, retrying, pytokens, pyquaternion, pyflakes, pycodestyle, protobuf, plyfile, pluggy, pathspec, parso, parameterized, opencv-python-headless, nest-asyncio, narwhals, mypy-extensions, mccabe, jupyterlab_widgets, itsdangerous, ipython-pygments-lexers, iniconfig, h5py, grpcio, fire, executing, decorator, configargparse, comm, cachetools, blinker, attrs, asttokens, absl-py, tensorboard, stack_data, referencing, pytest, prompt_toolkit, plotly, matplotlib-inline, jupyter-core, jedi, importlib-metadata, flask, flake8, black, lyft-dataset-sdk, jsonschema-specifications, ipython, descartes, dash, nuscenes-devkit, jsonschema, ipywidgets, nbformat, open3d
+  Attempting uninstall: Shapely
+    Found existing installation: shapely 2.1.2
+    Uninstalling shapely-2.1.2:
+      Successfully uninstalled shapely-2.1.2
+
+Successfully installed Shapely-2.0.7 absl-py-2.4.0 asttokens-3.0.1 attrs-26.1.0 black-26.3.1 blinker-1.9.0 cachetools-7.0.5 comm-0.2.3 configargparse-1.7.5 dash-4.1.0 decorator-5.2.1 descartes-1.1.0 executing-2.2.1 fastjsonschema-2.21.2 fire-0.7.1 flake8-7.3.0 flask-3.1.3 grpcio-1.80.0 h5py-3.11.0 importlib-metadata-9.0.0 iniconfig-2.3.0 ipython-9.10.1 ipython-pygments-lexers-1.1.1 ipywidgets-8.1.8 itsdangerous-2.2.0 jedi-0.19.2 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 jupyter-core-5.9.1 jupyterlab_widgets-3.0.16 lyft-dataset-sdk-0.0.8 matplotlib-inline-0.2.1 mccabe-0.7.0 mypy-extensions-1.1.0 narwhals-2.19.0 nbformat-5.10.4 nest-asyncio-1.6.0 nuscenes-devkit-1.2.0 open3d-0.19.0 opencv-python-headless-4.11.0.86 parameterized-0.9.0 parso-0.8.6 pathspec-1.0.4 plotly-6.7.0 pluggy-1.6.0 plyfile-1.1.3 prompt_toolkit-3.0.52 protobuf-7.34.1 pure-eval-0.2.3 pycodestyle-2.14.0 pyflakes-3.4.0 pyquaternion-0.9.9 pytest-9.0.3 pytokens-0.4.1 referencing-0.37.0 retrying-1.4.2 rpds-py-0.30.0 stack_data-0.6.3 tensorboard-2.18.0 tensorboard-data-server-0.7.2 traitlets-5.14.3 trimesh-4.8.3 wcwidth-0.6.0 werkzeug-3.1.8 widgetsnbextension-4.0.15 zipp-3.23.1
+
+===== 08_project_editable_install.log =====
+running develop
+python.exe : D:\codex_envs\3ddet_env\Lib\site-packages\setuptools\command\easy_install.py:156: EasyInstallDeprecationWa
+rning: easy_install command is deprecated. Use build and pip and other standards-based tools.
+At line:2 char:78
++ ... ng]::new(); & D:\codex_envs\3ddet_env\Scripts\python.exe setup.py dev ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (D:\codex_envs\3...ds-based tools.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  warnings.warn(
+D:\codex_envs\3ddet_env\Lib\site-packages\setuptools\command\install.py:34: SetuptoolsDeprecationWarning: setup.py inst
+all is deprecated. Use build and pip and other standards-based tools.
+  warnings.warn(
+running egg_info
+creating mmdet3d.egg-info
+writing manifest file 'mmdet3d.egg-info\SOURCES.txt'
+warning: no files found matching 'mmdet3d\.mim\model-index.yml'
+warning: no files found matching 'mmdet3d\.mim\dataset-index.yml'
+warning: no files found matching '*.cpp' under directory 'mmdet3d\.mim\ops'
+warning: no files found matching '*.cu' under directory 'mmdet3d\.mim\ops'
+warning: no files found matching '*.h' under directory 'mmdet3d\.mim\ops'
+warning: no files found matching '*.cc' under directory 'mmdet3d\.mim\ops'
+writing manifest file 'mmdet3d.egg-info\SOURCES.txt'
+D:\codex_envs\3ddet_env\Lib\site-packages\torch\utils\cpp_extension.py:502: UserWarning: Attempted to use ninja as the 
+BuildExtension backend but we could not find ninja.. Falling back to using the slow distutils backend.
+  warnings.warn(msg.format('we could not find ninja.'))
+running build_ext
+

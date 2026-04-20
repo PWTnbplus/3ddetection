@@ -1,0 +1,68 @@
+{
+  "data_root": "D:\\文章\\try\\VOD\\view_of_delft_PUBLIC\\lidar",
+  "workers": 8,
+  "converter": {
+    "elapsed_sec": 5.499030800000128,
+    "workers": 8,
+    "check_lidar": false,
+    "counts": {
+      "train": 5139,
+      "val": 1296,
+      "test": 2247
+    },
+    "samples_total": 8682
+  },
+  "text_generation": {
+    "elapsed_sec": 9.72092819999989,
+    "workers": 8,
+    "counts": {
+      "train": 5139,
+      "val": 1296,
+      "train_val": 6435,
+      "full": 8682
+    },
+    "records_total": 21552
+  },
+  "prompt_generation": {
+    "elapsed_sec": 1.7078753999999208,
+    "workers": 8,
+    "records_total": 8682
+  },
+  "text_hash_micro_benchmark": {
+    "elapsed_sec": 0.5319030999999086,
+    "repeat": 20,
+    "per_iter_sec": 0.02659515499999543,
+    "records_total": 8682,
+    "text_hash_dim": 768
+  },
+  "model_fastpaths": {
+    "device": "cuda",
+    "text_hash_tensor": {
+      "legacy_ms": 15.106132500000058,
+      "new_ms": 0.2728974999968159,
+      "speedup": 55.354602003229466
+    },
+    "sample_text_features": {
+      "legacy_ms": 6.440859999997883,
+      "new_ms": 0.2615125000033913,
+      "speedup": 24.629262463225878
+    },
+    "point_stats": {
+      "legacy_ms": 9.720164999998815,
+      "new_ms": 2.3624300000051335,
+      "speedup": 4.11447746598955
+    },
+    "single_token_attention": {
+      "legacy_ms": 13.609856000002765,
+      "new_ms": 0.3204840000034892,
+      "speedup": 42.46656931345899,
+      "max_abs_diff": 1.1920928955078125e-06
+    },
+    "image_to_bev_projection": {
+      "legacy_ms": 5.680116666667345,
+      "new_ms": 4.584916666658501,
+      "speedup": 1.238870208475791,
+      "max_abs_diff": 0.0
+    }
+  }
+}

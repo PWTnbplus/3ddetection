@@ -1,0 +1,57 @@
+{
+  "baseline": {
+    "converter_sec": 25.507344,
+    "text_generation_sec": 72.115487,
+    "prompt_generation_sec": 2.675627,
+    "text_hash_per_iter_sec": 0.420152
+  },
+  "after": {
+    "converter_sec": 5.4990308,
+    "text_generation_sec": 9.7209282,
+    "prompt_generation_sec": 1.7078754,
+    "text_hash_per_iter_sec": 0.026595155
+  },
+  "speedup": {
+    "converter_x": 4.64,
+    "text_generation_x": 7.42,
+    "prompt_generation_x": 1.57,
+    "text_hash_x": 15.8,
+    "pipeline_total_x": 5.92
+  },
+  "model_fastpaths": {
+    "device": "cuda",
+    "text_hash_tensor_ms": {
+      "legacy": 15.1061325,
+      "new": 0.2728975,
+      "speedup_x": 55.35
+    },
+    "sample_text_features_ms": {
+      "legacy": 6.44086,
+      "new": 0.2615125,
+      "speedup_x": 24.63
+    },
+    "point_stats_ms": {
+      "legacy": 9.720165,
+      "new": 2.36243,
+      "speedup_x": 4.11
+    },
+    "single_token_attention_ms": {
+      "legacy": 13.609856,
+      "new": 0.320484,
+      "speedup_x": 42.47,
+      "max_abs_diff": 1.1920928955078125e-06
+    },
+    "image_to_bev_projection_ms": {
+      "legacy": 5.680116666667345,
+      "new": 4.584916666658501,
+      "speedup_x": 1.24,
+      "max_abs_diff": 0.0
+    }
+  },
+  "notes": [
+    "converter/text/prompt 基准使用 D:/文章/try/VOD/view_of_delft_PUBLIC/lidar 作为完整 KITTI 风格根目录。",
+    "本地 radar/radar_5frames 目录中的软链接在 Windows 端不完整，因此不直接作为动态 benchmark 根目录。",
+    "text_hash_per_iter_sec 使用 8682 条文本、hash_dim=768、repeat=20 的微基准结果。",
+    "model_fastpaths 为第二轮模型热点微基准结果，重点覆盖文本构建、点云统计、单 token 注意力和图像投影到 BEV。"
+  ]
+}

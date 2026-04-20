@@ -248,6 +248,14 @@ class KittiMetric(BaseMetric):
                 eval_types = ['bbox']
             else:
                 eval_types = ['bbox', 'bev', '3d']
+                from mmdet3d.evaluation.functional.kitti_utils.rotate_iou import \
+                    probe_rotate_iou_backends
+                backend_info = probe_rotate_iou_backends()
+                print_log(
+                    'KITTI/VOD rotate IoU backend: '
+                    f"{backend_info['selected_backend']} "
+                    f"({backend_info['reason']})",
+                    logger=logger)
             ap_result_str, ap_dict_ = kitti_eval(
                 gt_annos,
                 results_dict[name],

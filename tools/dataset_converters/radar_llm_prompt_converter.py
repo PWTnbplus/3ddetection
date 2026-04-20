@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Dict, Iterable, List
 
@@ -19,9 +21,13 @@ SYSTEM_PROMPT = (
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description='Build LLM prompts from radar detector text records.')
+    default_input = (
+        Path(os.getenv('MMD3D_VOD_ROOT', 'D:/VOD_ascii')) /
+        'view_of_delft_PUBLIC' / 'radar' / 'texts' /
+        'radar_texts_prediction.json')
     parser.add_argument(
         '--input-file',
-        default='/root/lanyun-fs/dataset/radar/texts/radar_texts_prediction.json',
+        default=str(default_input),
         help='Input JSON generated from radar detector predictions.')
     parser.add_argument(
         '--output-file',
@@ -43,6 +49,11 @@ def parse_args() -> argparse.Namespace:
         choices=['en', 'zh'],
         default='en',
         help='Language of the expected LLM scene description.')
+    parser.add_argument(
+        '--workers',
+        type=int,
+        default=1,
+        help='Number of worker threads used to build prompt records.')
     return parser.parse_args()
 
 
@@ -177,10 +188,18 @@ def main() -> None:
         input_path.parent / 'radar_llm_prompts_prediction.jsonl')
 
     records = load_json(input_path)
-    prompt_records = [
-        build_prompt_record(record, args.max_objects, args.min_score,
-                            args.language) for record in records
-    ]
+    if args.workers <= 1:
+        prompt_records = [
+            build_prompt_record(record, args.max_objects, args.min_score,
+                                args.language) for record in records
+        ]
+    else:
+        with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
+            prompt_records = list(
+                executor.map(
+                    lambda record: build_prompt_record(record, args.max_objects,
+                                                       args.min_score,
+                                                       args.language), records))
     dump_jsonl(prompt_records, output_path)
     print(f'Saved {len(prompt_records)} LLM prompts to {output_path}')
 

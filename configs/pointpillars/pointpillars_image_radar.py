@@ -28,7 +28,7 @@ visualizer = dict(
     type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
 dataset_type = 'KittiDataset'
-data_root = '/root/lanyun-fs/dataset/radar_5frames/'
+data_root = '__VOD_BASE__'
 input_modality = dict(use_lidar=True, use_camera=True)
 backend_args = None
 data_prefix = dict(pts='', img='')
@@ -225,7 +225,7 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_train.pkl',
+        ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_train.pkl',
         data_prefix=data_prefix,
         pipeline=train_pipeline,
         modality=input_modality,
@@ -243,7 +243,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_val.pkl',
+        ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_val.pkl',
         data_prefix=data_prefix,
         pipeline=test_pipeline,
         modality=input_modality,
@@ -261,7 +261,7 @@ test_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_val.pkl',
+        ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_val.pkl',
         data_prefix=data_prefix,
         pipeline=test_pipeline,
         modality=input_modality,
@@ -273,13 +273,13 @@ test_dataloader = dict(
 val_evaluator = dict(
     type='KittiMetric',
     dataset='VOD',
-    ann_file=data_root + 'radar_infos_val.pkl',
+    ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_val.pkl',
     metric='bbox',
     backend_args=backend_args)
 test_evaluator = dict(
     type='KittiMetric',
     dataset='VOD',
-    ann_file=data_root + 'radar_infos_val.pkl',
+    ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_val.pkl',
     metric='bbox',
     backend_args=backend_args)
 

@@ -1,6 +1,3 @@
-import math
-import re
-import zlib
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import torch
@@ -8,6 +5,8 @@ from torch import Tensor, nn
 import torch.nn.functional as F
 
 from mmdet3d.registry import MODELS
+from mmdet3d.utils.text_hash import build_sample_text_features
+from .fast_utils import build_image_stats, build_point_stats, build_text_confidence
 from .bev_fusion import ImageRadarBEVFusion
 
 
@@ -40,6 +39,20 @@ class TextToBEVCrossAttention(nn.Module):
                 text_feat: Tensor,
                 text_mask: Optional[Tensor] = None) -> Tensor:
         batch_size, channels, height, width = bev_query.shape
+        if text_feat.dim() == 2:
+            text_feat = text_feat.unsqueeze(1)
+        if text_feat.shape[1] == 1 and text_mask is None:
+            value = self.value_proj(text_feat[:, 0, :])
+            embed_dim = self.attn.embed_dim
+            v_weight = self.attn.in_proj_weight[2 * embed_dim:, :]
+            if self.attn.in_proj_bias is not None:
+                v_bias = self.attn.in_proj_bias[2 * embed_dim:]
+            else:
+                v_bias = None
+            value = F.linear(value, v_weight, v_bias)
+            value = self.attn.out_proj(value)
+            return value[:, :, None, None].expand(batch_size, channels, height,
+                                                  width)
         query = bev_query.flatten(2).permute(2, 0, 1)
         key = self.key_proj(text_feat).permute(1, 0, 2)
         value = self.value_proj(text_feat).permute(1, 0, 2)
@@ -150,15 +163,20 @@ class ActorCriticTriplePolicy(nn.Module):
         self.actor = nn.Linear(hidden_dim, actions.shape[0])
         self.critic = nn.Linear(hidden_dim, 1)
 
-    def _pool(self, feat: Tensor) -> Tensor:
-        return feat.mean(dim=(2, 3))
-
     def forward(self, radar_feat: Tensor, image_feat: Tensor,
-                text_feat: Tensor, extra_state: Tensor):
+                text_feat: Tensor, extra_state: Tensor,
+                pooled_features: Optional[Tuple[Tensor, Tensor,
+                                                Tensor]] = None):
+        if pooled_features is None:
+            radar_pool = radar_feat.mean(dim=(2, 3))
+            image_pool = image_feat.mean(dim=(2, 3))
+            text_pool = text_feat.mean(dim=(2, 3))
+        else:
+            radar_pool, image_pool, text_pool = pooled_features
         state = torch.cat([
-            self._pool(radar_feat),
-            self._pool(image_feat),
-            self._pool(text_feat),
+            radar_pool,
+            image_pool,
+            text_pool,
             extra_state.detach()
         ],
                           dim=1)
@@ -292,13 +310,22 @@ class TripleModalRLBEVFusion(ImageRadarBEVFusion):
             text_feat = self._regularize_text_feats(text_feat)
             text_tokens = self.text_dropout(text_feat).unsqueeze(1)
             text_bev_feat = self.text_to_bev(radar_feat, text_tokens)
+            pooled_features = (
+                radar_feat.mean(dim=(2, 3)),
+                image_bev_feat.mean(dim=(2, 3)),
+                text_bev_feat.mean(dim=(2, 3)),
+            )
             extra_state = self._build_extra_state(
                 radar_feat, image_bev_feat, text_bev_feat,
-                batch_data_samples, batch_inputs_dict)
+                batch_data_samples, batch_inputs_dict, pooled_features)
             self.last_consistency_reward = extra_state[:, 5:7].mean(
                 dim=1, keepdim=True).detach().clamp(-1.0, 1.0)
             weights, rl_info = self.rl_agent(
-                radar_feat, image_bev_feat, text_bev_feat, extra_state)
+                radar_feat,
+                image_bev_feat,
+                text_bev_feat,
+                extra_state,
+                pooled_features=pooled_features)
             weighted_feat = (weights[:, 0:1, None, None] * radar_feat +
                              weights[:, 1:2, None, None] * image_bev_feat +
                              weights[:, 2:3, None, None] * text_bev_feat)
@@ -318,31 +345,8 @@ class TripleModalRLBEVFusion(ImageRadarBEVFusion):
         if not batch_data_samples:
             return torch.zeros(
                 (batch_size, self.text_hash_dim), device=device, dtype=dtype)
-        text_embeds = []
-        texts = []
-        for data_sample in batch_data_samples:
-            metainfo = data_sample.metainfo
-            text_embed = metainfo.get('text_embedding', None)
-            if text_embed is None:
-                text_embed = metainfo.get('text_feat', None)
-            if text_embed is not None:
-                text_embed = torch.as_tensor(
-                    text_embed, device=device, dtype=dtype).flatten()
-                if text_embed.numel() < self.text_hash_dim:
-                    text_embed = F.pad(
-                        text_embed, (0, self.text_hash_dim - text_embed.numel()))
-                text_embeds.append(text_embed[:self.text_hash_dim])
-                texts.append(None)
-            else:
-                text_embeds.append(None)
-                texts.append(str(metainfo.get('text', '')))
-
-        text_feats = self._encode_texts(
-            [text or '' for text in texts], device=device, dtype=dtype)
-        for row, text_embed in enumerate(text_embeds):
-            if text_embed is not None:
-                text_feats[row] = text_embed
-        return F.normalize(text_feats, dim=1)
+        return build_sample_text_features(batch_data_samples,
+                                          self.text_hash_dim, device, dtype)
 
     def _regularize_text_feats(self, text_feats: Tensor) -> Tensor:
         if not self.training:
@@ -362,38 +366,31 @@ class TripleModalRLBEVFusion(ImageRadarBEVFusion):
 
         return F.normalize(text_feats, dim=1)
 
-    def _encode_texts(self, texts: List[str], device: torch.device,
-                      dtype: torch.dtype) -> Tensor:
-        text_feats = torch.zeros(
-            (len(texts), self.text_hash_dim), device=device, dtype=dtype)
-        for row, text in enumerate(texts):
-            for token in re.findall(r'\w+', text.lower()):
-                token_hash = zlib.crc32(token.encode('utf-8'))
-                index = token_hash % self.text_hash_dim
-                sign = 1.0 if token_hash & 1 else -1.0
-                text_feats[row, index] += sign
-        return text_feats / text_feats.norm(dim=1, keepdim=True).clamp_min(1.0)
-
     def _build_extra_state(self, radar_feat: Tensor, image_feat: Tensor,
                            text_feat: Tensor, batch_data_samples,
-                           batch_inputs_dict) -> Tensor:
+                           batch_inputs_dict,
+                           pooled_features: Optional[Tuple[Tensor, Tensor,
+                                                           Tensor]] = None
+                           ) -> Tensor:
         batch_size = radar_feat.shape[0]
         device = radar_feat.device
         dtype = radar_feat.dtype
         image_stats = self._image_stats(batch_inputs_dict, batch_size, device,
                                         dtype)
         point_stats = self._point_stats(batch_inputs_dict, batch_size, device,
-                                       dtype)
+                                        dtype)
         text_conf = self._text_confidence(batch_data_samples, batch_size, device,
-                                         dtype)
+                                          dtype)
+        if pooled_features is None:
+            radar_pool = radar_feat.mean(dim=(2, 3))
+            image_pool = image_feat.mean(dim=(2, 3))
+            text_pool = text_feat.mean(dim=(2, 3))
+        else:
+            radar_pool, image_pool, text_pool = pooled_features
         radar_image_cos = F.cosine_similarity(
-            radar_feat.mean(dim=(2, 3)).float(),
-            image_feat.mean(dim=(2, 3)).float(),
-            dim=1).to(dtype)[:, None]
+            radar_pool.float(), image_pool.float(), dim=1).to(dtype)[:, None]
         radar_text_cos = F.cosine_similarity(
-            radar_feat.mean(dim=(2, 3)).float(),
-            text_feat.mean(dim=(2, 3)).float(),
-            dim=1).to(dtype)[:, None]
+            radar_pool.float(), text_pool.float(), dim=1).to(dtype)[:, None]
         prev_loss = self.loss_ema.expand(batch_size, 1).to(
             device=device, dtype=dtype)
         return torch.cat([
@@ -404,78 +401,21 @@ class TripleModalRLBEVFusion(ImageRadarBEVFusion):
 
     def _image_stats(self, batch_inputs_dict, batch_size: int,
                      device: torch.device, dtype: torch.dtype) -> Tensor:
-        if not batch_inputs_dict or batch_inputs_dict.get('imgs', None) is None:
-            return torch.zeros((batch_size, 2), device=device, dtype=dtype)
-        imgs = batch_inputs_dict['imgs'].detach().to(device=device, dtype=dtype)
-        dims = (1, 2, 3, 4) if imgs.dim() == 5 else (1, 2, 3)
-        brightness = imgs.mean(dim=dims).sigmoid()
-        variance = imgs.var(dim=dims, unbiased=False).clamp_min(0).sqrt()
-        variance = (variance / (variance + 1.0)).clamp(0, 1)
-        return torch.stack([brightness, variance], dim=1)
+        imgs = None if not batch_inputs_dict else batch_inputs_dict.get(
+            'imgs', None)
+        return build_image_stats(imgs, batch_size, device, dtype)
 
     def _point_stats(self, batch_inputs_dict, batch_size: int,
                      device: torch.device, dtype: torch.dtype) -> Tensor:
-        if not batch_inputs_dict or batch_inputs_dict.get('points', None) is None:
-            return torch.zeros((batch_size, 2), device=device, dtype=dtype)
-        counts = []
-        entropies = []
-        for points in batch_inputs_dict['points']:
-            points = points.detach().to(device=device, dtype=dtype)
-            counts.append(torch.as_tensor(
-                min(math.log1p(points.shape[0]) / 10.0, 1.0),
-                device=device,
-                dtype=dtype))
-            entropies.append(self._point_xy_entropy(points, device, dtype))
-        if len(counts) < batch_size:
-            pad = batch_size - len(counts)
-            counts.extend([torch.zeros((), device=device, dtype=dtype)] * pad)
-            entropies.extend([torch.zeros((), device=device, dtype=dtype)] * pad)
-        return torch.stack(
-            [torch.stack(counts[:batch_size]),
-             torch.stack(entropies[:batch_size])],
-            dim=1)
-
-    def _point_xy_entropy(self, points: Tensor, device: torch.device,
-                          dtype: torch.dtype) -> Tensor:
-        if points.numel() == 0 or points.shape[1] < 2:
-            return torch.zeros((), device=device, dtype=dtype)
-        if self.point_cloud_range is None:
-            xy = points[:, :2]
-            xy_min = xy.min(dim=0).values
-            xy_max = xy.max(dim=0).values
-        else:
-            x_min, y_min, _, x_max, y_max, _ = self.point_cloud_range
-            xy_min = torch.as_tensor([x_min, y_min], device=device, dtype=dtype)
-            xy_max = torch.as_tensor([x_max, y_max], device=device, dtype=dtype)
-        xy = (points[:, :2] - xy_min) / (xy_max - xy_min).clamp_min(1e-6)
-        valid = (xy[:, 0] >= 0) & (xy[:, 0] < 1) & (xy[:, 1] >= 0) & (xy[:, 1] < 1)
-        xy = xy[valid]
-        if xy.numel() == 0:
-            return torch.zeros((), device=device, dtype=dtype)
-        bins = 8
-        xy_idx = (xy * bins).long().clamp(0, bins - 1)
-        linear_idx = xy_idx[:, 1] * bins + xy_idx[:, 0]
-        hist = torch.bincount(linear_idx, minlength=bins * bins).to(dtype)
-        probs = hist / hist.sum().clamp_min(1.0)
-        entropy = -(probs * (probs + 1e-6).log()).sum()
-        return (entropy / math.log(bins * bins)).clamp(0, 1)
+        points = None if not batch_inputs_dict else batch_inputs_dict.get(
+            'points', None)
+        return build_point_stats(points, batch_size, device, dtype,
+                                 self.point_cloud_range)
 
     def _text_confidence(self, batch_data_samples, batch_size: int,
                          device: torch.device, dtype: torch.dtype) -> Tensor:
-        values = []
-        if batch_data_samples:
-            for data_sample in batch_data_samples:
-                metainfo = data_sample.metainfo
-                confidence = metainfo.get(
-                    'text_confidence',
-                    metainfo.get('text_conf', metainfo.get('llm_confidence', None)))
-                if confidence is None:
-                    confidence = 1.0 if metainfo.get('text', '') else 0.0
-                values.append(float(confidence))
-        if len(values) < batch_size:
-            values.extend([0.0] * (batch_size - len(values)))
-        return torch.as_tensor(
-            values[:batch_size], device=device, dtype=dtype).clamp(0, 1)[:, None]
+        return build_text_confidence(batch_data_samples, batch_size, device,
+                                     dtype)
 
     @torch.no_grad()
     def _build_reward(self, task_loss: Tensor,

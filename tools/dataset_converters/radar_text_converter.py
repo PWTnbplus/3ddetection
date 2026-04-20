@@ -3,8 +3,10 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import pickle
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
@@ -32,9 +34,10 @@ IGNORE_CLASSES = {'dontcare'}
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description='Generate scene text descriptions from radar detections.')
+    default_root = os.getenv('MMD3D_VOD_ROOT', 'D:/VOD_ascii/view_of_delft_PUBLIC/radar')
     parser.add_argument(
         '--data-root',
-        default='/root/lanyun-fs/dataset/radar',
+        default=default_root,
         help='Root path of the radar dataset.')
     parser.add_argument(
         '--source',
@@ -75,6 +78,16 @@ def parse_args() -> argparse.Namespace:
         nargs='+',
         default=['train', 'val', 'train_val', 'full', 'test'],
         help='ImageSets splits to process.')
+    parser.add_argument(
+        '--workers',
+        type=int,
+        default=1,
+        help='Number of worker threads used for per-sample text generation.')
+    parser.add_argument(
+        '--pretty-json',
+        action='store_true',
+        help='Write indented JSON for debugging. Compact JSON is faster and '
+        'used by default for large-scale generation.')
     return parser.parse_args()
 
 
@@ -114,8 +127,10 @@ def join_phrases(phrases: List[str]) -> str:
 
 
 def read_split_ids(split_file: Path) -> List[str]:
-    with split_file.open('r', encoding='utf-8') as f:
-        return [line.strip() for line in f if line.strip()]
+    return [
+        line for line in split_file.read_text(encoding='utf-8').splitlines()
+        if line
+    ]
 
 
 def parse_label_file(label_path: Path) -> List[Dict]:
@@ -420,10 +435,45 @@ def build_record(sample_id: str, label_path: Path) -> Dict:
     return build_record_from_objects(sample_id, objects, source='label_oracle')
 
 
-def dump_json(data: Iterable[Dict], output_path: Path) -> None:
+def dump_json(data: Iterable[Dict],
+              output_path: Path,
+              pretty: bool = False) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    encoder = json.JSONEncoder(
+        ensure_ascii=False,
+        indent=2 if pretty else None,
+        separators=None if pretty else (',', ':'))
     with output_path.open('w', encoding='utf-8') as f:
-        json.dump(list(data), f, indent=2, ensure_ascii=False)
+        f.write('[')
+        first = True
+        for record in data:
+            if not first:
+                f.write(',\n' if pretty else ',')
+            if pretty:
+                rendered = encoder.encode(record).replace('\n', '\n  ')
+                f.write(f'  {rendered}')
+            else:
+                f.write(encoder.encode(record))
+            first = False
+        if pretty and not first:
+            f.write('\n')
+        f.write(']')
+
+
+def build_records_for_split(sample_ids: List[str],
+                            label_dir: Path,
+                            workers: int = 1) -> List[Dict]:
+    if workers <= 1:
+        return [
+            build_record(sample_id, label_dir / f'{sample_id}.txt')
+            for sample_id in sample_ids
+        ]
+
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
+        return list(
+            executor.map(
+                lambda sample_id: build_record(sample_id, label_dir /
+                                               f'{sample_id}.txt'), sample_ids))
 
 
 def main() -> None:
@@ -446,7 +496,7 @@ def main() -> None:
             Path(args.prediction_file), args.class_names, args.score_thr,
             sample_id_map)
         output_path = output_dir / 'radar_texts_prediction.json'
-        dump_json(records, output_path)
+        dump_json(records, output_path, pretty=args.pretty_json)
         print(f'Saved {len(records)} prediction-based records to {output_path}')
         return
 
@@ -457,12 +507,10 @@ def main() -> None:
             continue
 
         sample_ids = read_split_ids(split_file)
-        records = [
-            build_record(sample_id, label_dir / f'{sample_id}.txt')
-            for sample_id in sample_ids
-        ]
+        records = build_records_for_split(
+            sample_ids, label_dir, workers=args.workers)
         output_path = output_dir / f'radar_texts_{split}.json'
-        dump_json(records, output_path)
+        dump_json(records, output_path, pretty=args.pretty_json)
         print(f'Saved {len(records)} records to {output_path}')
 
 

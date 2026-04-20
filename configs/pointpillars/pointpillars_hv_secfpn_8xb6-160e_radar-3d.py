@@ -4,7 +4,7 @@ _base_ = [
 ]
 
 dataset_type = 'RadarDataset'
-data_root = '/root/lanyun-fs/dataset/radar/'
+data_root = '__VOD_BASE__'
 point_cloud_range = [0, -39.68, -3, 69.12, 39.68, 1]
 input_modality = dict(use_lidar=True, use_camera=False)
 backend_args = None
@@ -105,7 +105,9 @@ test_pipeline = [
 train_dataloader = dict(
     batch_size=6,
     num_workers=4,
+    pin_memory=True,
     persistent_workers=True,
+    prefetch_factor=4,
     sampler=dict(type='DefaultSampler', shuffle=True),
     dataset=dict(
         type='RepeatDataset',
@@ -113,8 +115,8 @@ train_dataloader = dict(
         dataset=dict(
             type=dataset_type,
             data_root=data_root,
-            ann_file='radar_infos_train.pkl',
-            data_prefix=dict(pts='training/velodyne'),
+            ann_file='__INFO_ROOT_RADAR__/radar_infos_train.pkl',
+            data_prefix=dict(pts=''),
             pipeline=train_pipeline,
             modality=input_modality,
             test_mode=False,
@@ -125,14 +127,16 @@ train_dataloader = dict(
 val_dataloader = dict(
     batch_size=1,
     num_workers=1,
+    pin_memory=True,
     persistent_workers=True,
+    prefetch_factor=2,
     drop_last=False,
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        data_prefix=dict(pts='training/velodyne'),
-        ann_file='radar_infos_val.pkl',
+        data_prefix=dict(pts=''),
+        ann_file='__INFO_ROOT_RADAR__/radar_infos_val.pkl',
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
@@ -143,14 +147,16 @@ val_dataloader = dict(
 test_dataloader = dict(
     batch_size=1,
     num_workers=1,
+    pin_memory=True,
     persistent_workers=True,
+    prefetch_factor=2,
     drop_last=False,
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        data_prefix=dict(pts='training/velodyne'),
-        ann_file='radar_infos_test.pkl',
+        data_prefix=dict(pts=''),
+        ann_file='__INFO_ROOT_RADAR__/radar_infos_test.pkl',
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
@@ -161,7 +167,7 @@ test_dataloader = dict(
 val_evaluator = dict(
     type='KittiMetric',
     dataset='VOD',
-    ann_file=data_root + 'radar_infos_val.pkl',
+    ann_file='__INFO_ROOT_RADAR__/radar_infos_val.pkl',
     metric='bbox',
     format_only=True,
     pklfile_prefix='work_dirs/pointpillars_radar/predictions',
@@ -170,7 +176,7 @@ val_evaluator = dict(
 test_evaluator = dict(
     type='KittiMetric',
     dataset='VOD',
-    ann_file=data_root + 'radar_infos_test.pkl',
+    ann_file='__INFO_ROOT_RADAR__/radar_infos_test.pkl',
     metric='bbox',
     format_only=True,
     pklfile_prefix='work_dirs/pointpillars_radar_test/predictions',

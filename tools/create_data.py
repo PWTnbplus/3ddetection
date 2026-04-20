@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
+import os
 from os import path as osp
 
 from mmengine import print_log
@@ -270,7 +271,9 @@ def radar_data_prep(root_path,
                     info_prefix,
                     out_dir,
                     splits=('train', 'val', 'test'),
-                    only_gt_database=False):
+                    only_gt_database=False,
+                    workers=1,
+                    modality='radar'):
     """Prepare VOD radar infos without using KITTI truncated semantics."""
     if only_gt_database:
         create_groundtruth_database(
@@ -286,7 +289,9 @@ def radar_data_prep(root_path,
         out_dir=out_dir,
         pkl_prefix=info_prefix,
         splits=list(splits),
-        check_lidar=True)
+        check_lidar=True,
+        workers=workers,
+        modality=modality)
 
 
 parser = argparse.ArgumentParser(description='Data converter arg parser')
@@ -319,6 +324,12 @@ parser.add_argument(
     required=False,
     help='name of info pkl')
 parser.add_argument('--extra-tag', type=str, default='kitti')
+parser.add_argument(
+    '--modality',
+    type=str,
+    default=os.getenv('MMD3D_VOD_MODALITY', 'radar'),
+    help='VOD sensor modality for radar/vod conversion, such as radar or '
+    'radar_5frames.')
 parser.add_argument(
     '--workers', type=int, default=4, help='number of threads to be used')
 parser.add_argument(
@@ -445,6 +456,8 @@ if __name__ == '__main__':
             root_path=args.root_path,
             info_prefix=args.extra_tag,
             out_dir=args.out_dir,
-            only_gt_database=args.only_gt_database)
+            only_gt_database=args.only_gt_database,
+            workers=args.workers,
+            modality=args.modality)
     else:
         raise NotImplementedError(f'Don\'t support {args.dataset} dataset.')

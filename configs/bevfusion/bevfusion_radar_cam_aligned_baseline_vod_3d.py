@@ -16,7 +16,7 @@ default_hooks = dict(
     visualization=dict(type='Det3DVisualizationHook'))
 
 env_cfg = dict(
-    cudnn_benchmark=False,
+    cudnn_benchmark=True,
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0),
     dist_cfg=dict(backend='nccl'))
 
@@ -37,11 +37,8 @@ class_names = ['Pedestrian', 'Cyclist', 'Car']
 
 metainfo = dict(classes=class_names)
 dataset_type = 'RadarDataset'
-data_root = '/root/lanyun-fs/dataset/radar/'
-data_prefix = dict(
-    # BEVFusion consumes this as points; files here are VOD radar points.
-    pts='training/velodyne',
-    img='training/image_2')
+data_root = '__VOD_BASE__'
+data_prefix = dict(pts='', img='')
 input_modality = dict(use_lidar=True, use_camera=True, use_radar=True)
 backend_args = None
 
@@ -299,14 +296,16 @@ test_pipeline = [
 train_dataloader = dict(
     batch_size=4,
     num_workers=4,
+    pin_memory=True,
     persistent_workers=True,
+    prefetch_factor=4,
     sampler=dict(type='DefaultSampler', shuffle=True),
     dataset=dict(
         type='CBGSDataset',
         dataset=dict(
             type=dataset_type,
             data_root=data_root,
-            ann_file='radar_infos_train.pkl',
+            ann_file='__INFO_ROOT_RADAR__/radar_infos_train.pkl',
             pipeline=train_pipeline,
             metainfo=metainfo,
             modality=input_modality,
@@ -317,13 +316,15 @@ train_dataloader = dict(
 val_dataloader = dict(
     batch_size=1,
     num_workers=4,
+    pin_memory=True,
     persistent_workers=True,
+    prefetch_factor=2,
     drop_last=False,
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='radar_infos_val.pkl',
+        ann_file='__INFO_ROOT_RADAR__/radar_infos_val.pkl',
         pipeline=test_pipeline,
         metainfo=metainfo,
         modality=input_modality,
@@ -337,7 +338,7 @@ test_dataloader = val_dataloader
 val_evaluator = dict(
     type='KittiMetric',
     dataset='VOD',
-    ann_file=data_root + 'radar_infos_val.pkl',
+    ann_file='__INFO_ROOT_RADAR__/radar_infos_val.pkl',
     metric='bbox',
     backend_args=backend_args)
 test_evaluator = val_evaluator

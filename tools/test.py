@@ -7,6 +7,7 @@ from mmengine.config import Config, ConfigDict, DictAction
 from mmengine.registry import RUNNERS
 from mmengine.runner import Runner
 
+from local_paths import apply_placeholder_mapping
 from mmdet3d.utils import replace_ceph_backend
 
 
@@ -109,6 +110,7 @@ def main():
     cfg.launcher = args.launcher
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
+    apply_placeholder_mapping(cfg)
 
     # work_dir is determined in this priority: CLI > segment in file > filename
     if args.work_dir is not None:
@@ -118,6 +120,9 @@ def main():
         # use config filename as default work_dir if cfg.work_dir is None
         cfg.work_dir = osp.join('./work_dirs',
                                 osp.splitext(osp.basename(args.config))[0])
+    elif os.getenv('MMD3D_WORK_ROOT') and not osp.isabs(cfg.work_dir):
+        cfg.work_dir = osp.join(os.getenv('MMD3D_WORK_ROOT'),
+                                osp.basename(cfg.work_dir))
 
     cfg.load_from = args.checkpoint
 

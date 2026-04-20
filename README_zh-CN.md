@@ -135,6 +135,104 @@ MMDetection3D 是一个基于 PyTorch 的目标检测开源工具箱，下一代
 
 请参考[快速入门文档](https://mmdetection3d.readthedocs.io/zh_CN/latest/get_started.html)进行安装。
 
+## 本地环境自动搭建记录
+
+### 环境说明
+
+- 当前仓库的本地环境搭建、验证、依赖清单与快速启动说明，统一补充在本节及配套文件中。
+- 自动化环境产物目录：`environment_setup/`
+- 目标优先级：先尝试 GPU 可运行方案；若 GPU 方案客观失败，再保底提供 CPU 可运行方案。
+
+### 本次环境结论
+
+- 最终采用新的独立 `venv` 环境：`D:\codex_envs\3ddet_env`
+- Python 版本：`3.11.7`
+- GPU 路线：已完成并验证通过
+- PyTorch 组合：`torch 2.1.2+cu121`、`torchvision 0.16.2+cu121`、`torchaudio 2.1.2+cu121`
+- OpenMMLab 组合：`mmengine 0.10.5`、`mmcv 2.1.0`、`mmdet 3.3.0`、仓库本体 `mmdet3d 1.4.0`
+- 点云相关核心依赖：`open3d 0.19.0`、`nuscenes-devkit 1.2.0`、`lyft-dataset-sdk 0.0.8`、`tensorboard 2.18.0`、`h5py 3.11.0`、`pyquaternion 0.9.9`、`plyfile 1.1.3`、`trimesh 4.8.3`
+- 当前 GPU 识别结果：`NVIDIA GeForce RTX 4060 Laptop GPU`
+- 已验证通过的关键能力：
+  - `torch.cuda.is_available()` 返回 `True`
+  - `mmcv.ops` 可导入，`nms` 与 `voxelization` 扩展可用
+  - `tools/train.py -h`、`tools/test.py -h`、`tools/create_data.py -h` 可运行
+  - `configs/pointpillars/pointpillars_image_radar_rl_align.py` 可加载，主模型 `ImagePointVoxelNetRLAlign` 可构建
+
+### 环境创建与激活
+
+```powershell
+# 激活环境
+D:\codex_envs\3ddet_env\Scripts\activate
+
+# 进入项目
+cd D:\文章\try\3ddetection
+```
+
+如需避开 Windows 中文路径带来的兼容问题，可使用已创建的 ASCII 别名路径：
+
+```powershell
+cd D:\3ddetection_ascii
+```
+
+### 依赖安装说明
+
+- 原计划优先使用 conda 新建干净 GPU 环境，但当前机器访问 `repo.anaconda.com` 失败，因此切换为新的 `venv` 方案。
+- `mmcv` 通过 `openmim` 自动命中 `cu121 / torch2.1.0 / win_amd64` 预编译轮子，避免了本地手工编译扩展。
+- 仓库通过 legacy editable 方式安装到环境中，以兼容当前 `setup.py` 风格工程。
+- 完整依赖锁定见：
+  - `environment_setup/requirements_resolved.txt`
+  - `environment_setup/environment_resolved.yml`
+
+### GPU / CUDA / 扩展说明
+
+- 本机驱动报告的 CUDA Runtime 为 `12.8`，实际安装的 PyTorch 轮子为 `cu121`，二者可兼容运行。
+- 当前已验证 `mmcv.ops` 正常可用，因此 PointPillars / voxelization / NMS 相关主线具备基本运行条件。
+- `spconv`、`MinkowskiEngine`、`torchsparse` 未作为本次主线环境的默认安装项：
+  - 当前仓库保留的 PointPillars / 雷达融合 / VOD 数据处理主线不依赖它们才能完成基础运行。
+  - 若后续要跑依赖这些稀疏卷积后端的特定模型，再按具体模型补装即可。
+
+### 验证方式
+
+```powershell
+# 1. 验证 PyTorch 与 CUDA
+D:\codex_envs\3ddet_env\Scripts\python.exe - <<'PY'
+import torch
+print(torch.__version__)
+print(torch.cuda.is_available())
+print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU only')
+PY
+
+# 2. 验证 OpenMMLab 主栈
+D:\codex_envs\3ddet_env\Scripts\python.exe - <<'PY'
+import mmengine, mmcv, mmdet, mmdet3d, open3d
+print(mmengine.__version__, mmcv.__version__, mmdet.__version__, mmdet3d.__version__, open3d.__version__)
+PY
+
+# 3. 验证项目入口
+D:\codex_envs\3ddet_env\Scripts\python.exe tools\train.py -h
+D:\codex_envs\3ddet_env\Scripts\python.exe tools\test.py -h
+D:\codex_envs\3ddet_env\Scripts\python.exe tools\create_data.py -h
+```
+
+### 常见问题
+
+- `conda create` 失败：当前机器访问 `repo.anaconda.com` 时返回 `HTTP 000 CONNECTION FAILED`，已在 `install_log.txt` 记录，因此本次采用 `venv` 方案。
+- `pip install -e` 失败：新版 `pip` 对 editable 构建钩子更严格，当前仓库通过 `setup.py develop` 的 legacy editable 方式成功挂载。
+- `mmdet3d.datasets` / `tools/create_data.py` 导入失败：原因是工程瘦身后移除了 `seg3d_dataset.py`，但 `datasets/__init__.py` 仍保留强引用；本次已改为按存在情况导入，仅解除残留引用，不改变当前 3D 检测主线逻辑。
+
+### 变更记录
+
+- 2026-04-20 10:52：启动“项目环境自动搭建”任务，原因是当前仓库需要一套新的、可验证的独立环境；处理策略为不复用旧环境，直接新建干净环境并重新安装依赖。
+- 2026-04-20 10:53：完成环境识别与产物目录初始化，确认本机存在 NVIDIA GPU（RTX 4060，驱动 572.83，CUDA Runtime 12.8），项目核心依赖栈为 PyTorch + MMEngine + MMCV + MMDetection + MMDetection3D，并创建 `environment_setup/` 与 `environment_setup/logs/` 用于汇总安装日志、检查报告和快速启动文档。
+- 2026-04-20 10:54：尝试按优先级使用 conda 新建 GPU 环境，但因当前机器访问 `repo.anaconda.com` 发生 `HTTP 000 CONNECTION FAILED` 而无法继续；为保证任务不中断，切换到新的独立 `venv` 方案，在 `D:\codex_envs\3ddet_env` 创建干净 Python 3.11.7 环境，后续继续按 GPU 优先路线安装 PyTorch 与 OpenMMLab 依赖。
+- 2026-04-20 11:08：完成基础工具链与科学计算栈安装，包括 `pip/setuptools/wheel/cython/ninja/cmake/openmim`、`numpy/scipy/pandas/scikit-learn/matplotlib/numba/opencv-python/scikit-image` 等，为后续 OpenMMLab 和点云依赖安装提供基础。
+- 2026-04-20 11:20：完成 GPU 版 PyTorch 主栈安装并验证通过，当前环境组合为 `torch 2.1.2+cu121`、`torchvision 0.16.2+cu121`、`torchaudio 2.1.2+cu121`；`torch.cuda.is_available()` 返回 `True`，识别到设备 `NVIDIA GeForce RTX 4060 Laptop GPU`。
+- 2026-04-20 11:28：完成 OpenMMLab 主栈安装，组合为 `mmengine 0.10.5`、`mmdet 3.3.0`、`mmcv 2.1.0`，并确认 `mmcv.ops`、`mmcv.ops.nms`、`mmcv.ops.voxelization` 可正常导入，说明核心扩展算子可用。
+- 2026-04-20 11:31：补齐点云与数据集相关依赖，包括 `open3d 0.19.0`、`nuscenes-devkit 1.2.0`、`lyft-dataset-sdk 0.0.8`、`tensorboard 2.18.0`、`h5py`、`pyquaternion`、`plyfile`、`trimesh` 等。
+- 2026-04-20 11:35：为降低 Windows 中文路径对可编辑安装与脚本调用的影响，新增 ASCII 路径别名 `D:\3ddetection_ascii` 指向当前仓库；项目通过 legacy editable 方式挂载到新环境。
+- 2026-04-20 11:38：修复瘦身后残留的数据集导出问题，在 `mmdet3d/datasets/__init__.py` 中将缺失的室内分割数据集改为按存在情况导入，避免 `tools/create_data.py` 与 `mmdet3d.datasets` 因不存在的 `seg3d_dataset` 失败；该修改不影响当前 3D 检测主线。
+- 2026-04-20 11:39：完成环境验证与文档落盘，已生成 `environment_setup/requirements_resolved.txt`、`environment_setup/environment_resolved.yml`、`environment_setup/install_log.txt`、`environment_setup/env_check_report.md`、`environment_setup/quick_start.md`；并确认训练、测试、数据准备入口至少可运行到参数解析阶段，PointPillars 雷达融合主线配置可加载并完成模型构建。
+
 ## 教程
 
 <details>

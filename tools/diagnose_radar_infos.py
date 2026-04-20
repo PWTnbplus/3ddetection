@@ -8,6 +8,8 @@ from typing import Any
 
 import numpy as np
 
+from local_paths import build_runtime_paths, info_file
+
 
 DEFAULT_CLASSES = ('Car', 'Pedestrian', 'Cyclist')
 
@@ -15,9 +17,10 @@ DEFAULT_CLASSES = ('Car', 'Pedestrian', 'Cyclist')
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description='Check MMDet3D radar info pkl integrity.')
-    parser.add_argument('--data-root', default='dataset/radar')
-    parser.add_argument('--train-pkl', default='dataset/radar/radar_infos_train.pkl')
-    parser.add_argument('--val-pkl', default='dataset/radar/radar_infos_val.pkl')
+    defaults = build_runtime_paths('radar', 'diagnose_radar_infos')
+    parser.add_argument('--data-root', default=defaults['vod_root'])
+    parser.add_argument('--train-pkl', default=info_file('radar', 'train'))
+    parser.add_argument('--val-pkl', default=info_file('radar', 'val'))
     parser.add_argument('--test-pkl', default='')
     parser.add_argument('--classes', nargs='+', default=list(DEFAULT_CLASSES))
     parser.add_argument('--sample-count', type=int, default=5)
@@ -45,6 +48,9 @@ def resolve_under(root: Path, subdir: str, value: str | None) -> Path | None:
     path = Path(value)
     if path.is_absolute():
         return path
+    if path.parts and path.parts[0] in {
+            'lidar', 'radar', 'radar_3frames', 'radar_5frames', 'infos'}:
+        return root / path
     return root / 'training' / subdir / path
 
 

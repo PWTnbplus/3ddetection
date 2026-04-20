@@ -119,8 +119,8 @@ def image_box_overlap(boxes, query_boxes, criterion=-1):
 
 
 def bev_box_overlap(boxes, qboxes, criterion=-1):
-    from .rotate_iou import rotate_iou_gpu_eval
-    riou = rotate_iou_gpu_eval(boxes, qboxes, criterion)
+    from .rotate_iou import rotate_iou_eval
+    riou = rotate_iou_eval(boxes, qboxes, criterion)
     return riou
 
 
@@ -157,9 +157,9 @@ def d3_box_overlap_kernel(boxes, qboxes, rinc, criterion=-1):
 
 
 def d3_box_overlap(boxes, qboxes, criterion=-1):
-    from .rotate_iou import rotate_iou_gpu_eval
-    rinc = rotate_iou_gpu_eval(boxes[:, [0, 2, 3, 5, 6]],
-                               qboxes[:, [0, 2, 3, 5, 6]], 2)
+    from .rotate_iou import rotate_iou_eval
+    rinc = rotate_iou_eval(boxes[:, [0, 2, 3, 5, 6]],
+                           qboxes[:, [0, 2, 3, 5, 6]], 2)
     d3_box_overlap_kernel(boxes, qboxes, rinc, criterion)
     return rinc
 

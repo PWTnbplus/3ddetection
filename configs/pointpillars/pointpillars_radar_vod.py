@@ -9,7 +9,7 @@ class_names = [
 work_dir = './work_dirs/pointpillars_radar_vod'
 point_cloud_range = [0, -25.6, -3, 51.2, 25.6, 2]
 voxel_size = [0.16, 0.16, 5]
-data_root = '/root/lanyun-fs/dataset/radar_5frames/'
+data_root = '__VOD_BASE__'
 dataset_type = 'KittiDataset'
 # db_sampler = dict(
 #     backend_args=None,
@@ -211,8 +211,7 @@ train_cfg = dict(
     max_epochs=80,
     val_interval=1)
 val_cfg = dict(type='ValLoop')
-#test_cfg = dict(type='TestLoop') 
-# test_cfg = dict()
+test_cfg = dict(type='TestLoop')
 
 train_pipeline = [
     dict(
@@ -252,11 +251,11 @@ train_dataloader = dict(
     batch_size=8,
     dataset=dict(
         dataset=dict(
-            ann_file='radar_infos_train.pkl',
+            ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_train.pkl',
             backend_args=None,
             box_type_3d='LiDAR',
             data_prefix=dict(pts=''),
-            data_root='/root/lanyun-fs/dataset/radar_5frames/',
+            data_root=data_root,
             metainfo=metainfo,
             modality=input_modality,
             pipeline=train_pipeline,
@@ -272,7 +271,7 @@ train_dataloader = dict(
     batch_size=1,
     dataset=dict(
         # ann_file='radar_infos_val.pkl',
-        ann_file='radar_infos_test.pkl',
+        ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_test.pkl',
         backend_args=None,
         box_type_3d='LiDAR',
         data_prefix=dict(pts=''),
@@ -296,7 +295,7 @@ train_dataloader = dict(
 """test_evaluator = dict(
     type='KittiMetric',
     dataset='VOD',
-    ann_file='/root/lanyun-fs/dataset/radar_infos_test.pkl',
+    ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_test.pkl',
     metric='bbox',
     format_only=True,
     submission_prefix='results/kitti-3class/kitti_results') # for submission
@@ -312,19 +311,21 @@ val_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         data_prefix=dict(pts=''),
-        ann_file='radar_infos_val.pkl',
+        ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_val.pkl',
         pipeline=test_pipeline,
         modality=input_modality,
         test_mode=True,
         metainfo=metainfo,
         box_type_3d='LiDAR'))
+test_dataloader = val_dataloader
 
 val_evaluator = dict(
-    ann_file='/root/lanyun-fs/dataset/radar_5frames/radar_infos_val.pkl',
+    ann_file='__INFO_ROOT_RADAR_5FRAMES__/radar_infos_val.pkl',
     backend_args=None,
     dataset='VOD',
     metric='bbox',
     type='KittiMetric')
+test_evaluator = val_evaluator
 
 vis_backends = [
     dict(type='LocalVisBackend'),

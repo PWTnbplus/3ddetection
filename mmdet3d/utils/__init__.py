@@ -4,6 +4,7 @@ from .collect_env import collect_env
 from .compat_cfg import compat_cfg
 from .misc import replace_ceph_backend
 from .setup_env import register_all_modules, setup_multi_processes
+from .text_hash import build_hashed_text_tensor, hash_text_to_numpy
 from .typing_utils import (ConfigType, InstanceList, MultiConfig,
                            OptConfigType, OptInstanceList, OptMultiConfig,
                            OptSampleList, OptSamplingResultList)
@@ -13,5 +14,5 @@ __all__ = [
     'register_all_modules', 'array_converter', 'ArrayConverter', 'ConfigType',
     'OptConfigType', 'MultiConfig', 'OptMultiConfig', 'InstanceList',
     'OptInstanceList', 'OptSamplingResultList', 'replace_ceph_backend',
-    'OptSampleList'
+    'OptSampleList', 'build_hashed_text_tensor', 'hash_text_to_numpy'
 ]

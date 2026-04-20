@@ -1,12 +1,12 @@
-import re
-import zlib
 from typing import List, Optional, Sequence, Tuple
 
 import torch
+import torch.nn.functional as F
 from torch import Tensor, nn
 
 from mmdet3d.registry import MODELS
 from ...structures.det3d_data_sample import OptSampleList, SampleList
+from ...utils.text_hash import build_sample_text_features
 from .voxelnet import VoxelNet
 
 
@@ -150,27 +150,16 @@ class TextVoxelNet(VoxelNet):
 
         device = feats[0].device
         dtype = feats[0].dtype
-        texts = [sample.metainfo.get('text', '') for sample in batch_data_samples]
-        text_feats = self._encode_texts(texts, device=device, dtype=dtype)
+        text_feats = self._build_text_feats(
+            batch_data_samples, device=device, dtype=dtype)
         channel_bias = self.channel_text_proj(text_feats)
         scalar_bias = self.scalar_text_proj(text_feats)
         return self._fuse_text(feats, channel_bias, scalar_bias)
 
-    def _encode_texts(self, texts: List[str], device: torch.device,
-                      dtype: torch.dtype) -> Tensor:
-        text_feats = torch.zeros(
-            (len(texts), self.text_hash_dim), device=device, dtype=dtype)
-
-        for row, text in enumerate(texts):
-            tokens = re.findall(r'[a-z0-9]+', text.lower())
-            for token in tokens:
-                token_hash = zlib.crc32(token.encode('utf-8'))
-                index = token_hash % self.text_hash_dim
-                sign = 1.0 if token_hash & 1 else -1.0
-                text_feats[row, index] += sign
-
-        norm = text_feats.norm(dim=1, keepdim=True).clamp_min(1.0)
-        return text_feats / norm
+    def _build_text_feats(self, batch_data_samples: SampleList,
+                          device: torch.device, dtype: torch.dtype) -> Tensor:
+        return build_sample_text_features(batch_data_samples, self.text_hash_dim,
+                                          device, dtype)
 
     def _fuse_text(self, feats, channel_bias: Tensor, scalar_bias: Tensor):
         fused_feats = []
